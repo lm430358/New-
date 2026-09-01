@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Single business workspace. In practice most installs have one row, but the
+/// schema allows several (e.g. an agency running the tool for multiple clients).
+model BusinessProfile {
+  id                 String   @id @default(cuid())
+  businessName       String
+  industry           String
+  productsServices   String
+  targetAudience     String
+  brandVoice         String // one of the preset voice ids, or "custom"
+  customVoiceName    String?
+  customVoiceNotes   String?
+  voiceSamples       String? // JSON string[] of example writing the user provided
+  location           String?
+  website            String?
+  socialAccounts     String? // JSON { platform: handle }
+  brandDescription   String?
+  usp                String?
+  pricingInfo        String?
+  currentPromotions  String?
+  goals              String? // JSON string[]
+  competitors        String? // JSON string[]
+  preferredPlatforms String? // JSON string[]
+  contentPillars     String? // JSON ContentPillar[] cached from last generation
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  contentItems  ContentItem[]
+  calendars     ContentCalendar[]
+  campaigns     Campaign[]
+  leadMagnets   LeadMagnet[]
+  conversations Conversation[]
+}
+
+/// Singleton row holding app-wide settings (which business profile is active).
+model Settings {
+  id                      String  @id @default("singleton")
+  activeBusinessProfileId String?
+}
+
+/// One saved piece of content in the Content Library. `body` holds the
+/// structured generation result as JSON so the UI can re-render it richly.
+model ContentItem {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+
+  type            String // social_post | video_script | email | blog_post | sales_copy | lead_magnet | campaign_asset | improved_content | idea | image_prompt | other
+  platform        String? // facebook | instagram | tiktok | linkedin | youtube | email | blog | general
+  title           String
+  body            String // JSON-serialized structured content
+  imagePrompt     String?
+  qualityScore    Int?
+  qualityFeedback String? // JSON QualityReport
+  tags            String? // JSON string[]
+  pillar          String?
+  favorite        Boolean  @default(false)
+  sourceTool      String? // which tool produced this (social, video, calendar, campaign, repurpose, improver, sales, lead-magnet, assistant...)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ContentCalendar {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+
+  title     String
+  days      Int
+  startDate DateTime
+  entries   String // JSON CalendarEntry[]
+  createdAt DateTime @default(now())
+}
+
+model Campaign {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+
+  title     String
+  input     String // JSON of the campaign brief inputs
+  strategy  String // JSON structured campaign output
+  createdAt DateTime @default(now())
+}
+
+model LeadMagnet {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+
+  format    String // ebook | checklist | guide | workbook | resource_list | template | quiz | free_report | cheat_sheet
+  title     String
+  content   String // JSON structured lead magnet output
+  createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+
+  title     String    @default("New conversation")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role      String // user | assistant
+  content   String
+  createdAt DateTime @default(now())
+}
