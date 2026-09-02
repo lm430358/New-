@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PIPELINE_STAGES } from "@/lib/content/workflow";
+
+const VALID_STAGE_IDS = new Set(PIPELINE_STAGES.map((s) => s.id));
+const VALID_CLOSED_STATUSES = new Set(["open", "won", "lost"]);
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +30,9 @@ const ALLOWED_FIELDS = [
   "researchNotes",
   "personalizationHook",
   "opportunity",
+  "leadScore",
+  "scoreReasoning",
+  "problemsFound",
   "offerRecommended",
   "potentialDealSize",
   "estimatedValue",
@@ -42,6 +49,26 @@ const ALLOWED_FIELDS = [
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json();
+
+  if ("stage" in body && !VALID_STAGE_IDS.has(body.stage)) {
+    return NextResponse.json(
+      { error: `Invalid stage "${body.stage}". Must be one of: ${[...VALID_STAGE_IDS].join(", ")}` },
+      { status: 400 }
+    );
+  }
+  if ("closedStatus" in body && !VALID_CLOSED_STATUSES.has(body.closedStatus)) {
+    return NextResponse.json(
+      { error: `Invalid closedStatus "${body.closedStatus}". Must be one of: open, won, lost` },
+      { status: 400 }
+    );
+  }
+  if ("leadScore" in body && body.leadScore !== null) {
+    const n = Number(body.leadScore);
+    if (!Number.isInteger(n) || n < 1 || n > 100) {
+      return NextResponse.json({ error: "leadScore must be an integer between 1 and 100, or null" }, { status: 400 });
+    }
+  }
+
   const data: Record<string, unknown> = {};
   for (const key of ALLOWED_FIELDS) {
     if (key in body) {
@@ -50,6 +77,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         data[key] = v ? new Date(v) : null;
       } else if (["potentialDealSize", "estimatedValue"].includes(key)) {
         data[key] = v === "" || v === null ? null : Number(v);
+      } else if (key === "leadScore") {
+        data[key] = v === null ? null : Number(v);
+      } else if (key === "problemsFound") {
+        data[key] = Array.isArray(v) ? JSON.stringify(v) : v;
       } else {
         data[key] = v;
       }

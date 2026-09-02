@@ -2,12 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateOutreachMessage } from "@/lib/ai/generators";
 import { AiGenerationError } from "@/lib/ai/generate";
+import { OUTREACH_TEMPLATES } from "@/lib/content/outreach-templates";
+
+const VALID_CHANNELS = new Set(OUTREACH_TEMPLATES.map((t) => t.channel));
+const VALID_STAGES = new Set(OUTREACH_TEMPLATES.map((t) => t.stage));
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { channel, stage } = await req.json();
   if (!channel || !stage) {
     return NextResponse.json({ error: "channel and stage are required" }, { status: 400 });
+  }
+  if (!VALID_CHANNELS.has(channel)) {
+    return NextResponse.json({ error: `Invalid channel "${channel}". Must be one of: ${[...VALID_CHANNELS].join(", ")}` }, { status: 400 });
+  }
+  if (!VALID_STAGES.has(stage)) {
+    return NextResponse.json({ error: `Invalid stage "${stage}". Must be one of: ${[...VALID_STAGES].join(", ")}` }, { status: 400 });
   }
 
   const lead = await prisma.lead.findUnique({ where: { id } });
