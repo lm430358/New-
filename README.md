@@ -50,13 +50,17 @@ src/
     playbook/                — Strategy, market research, full automation map (Phase 1 & 6)
     api/                     — leads, leads/[id]/score, leads/[id]/outreach,
                                 leads/[id]/mini-audit, outreach/[id] (approve/mark-sent),
-                                tasks/[id], audit
+                                tasks/[id], audit, automations/run-followups
+  instrumentation.ts         — registers the follow-up scheduler on server start (see §5)
   lib/
     ai/
       client.ts, generate.ts   — shared Anthropic client + structured-output helper
       schemas.ts                — Zod schemas for every AI output (score, outreach, audits)
       generators.ts              — prompt builders: scoreLead, generateOutreachMessage,
                                     generateMiniAudit, generateFullAuditReport
+    automations/
+      followupSequence.ts      — the initial→followup_1→followup_2→followup_3 timing/order
+      followupScheduler.ts      — scans for due leads and drafts the next follow-up
     content/
       strategy.ts, offer.ts, workflow.ts, outreach-templates.ts, products.ts, recurring.ts
 ```
@@ -96,14 +100,50 @@ opportunities, competitor findings, priority recommendations, 30/60/90-day plans
 channels, content strategy, acquisition strategy, impact/effort-scored priorities, KPIs, and
 next actions. Review before sending to a client.
 
-## 5. Automation map (Phase 6)
+## 5. Follow-up scheduling automation
+
+The "Follow Up" step of the pipeline runs on its own: `src/instrumentation.ts` starts a timer
+when the server boots (default every 60 minutes, no external cron service, no new accounts —
+just a `setInterval` that lives as long as the Node process does) that calls
+`runFollowUpScheduler()` (`src/lib/automations/followupScheduler.ts`). Each run:
+
+1. Finds leads where `closedStatus: "open"`, `stage: "contacted"`, `response: null` (nobody's
+   logged a reply), and `nextFollowUp` has arrived.
+2. For each, figures out how far along the `initial → followup_1 → followup_2 → followup_3`
+   sequence it's gotten — by sequence position among its `marked_sent` messages, not by
+   `createdAt` (two messages could in principle share a timestamp, and sequence position is what
+   actually matters).
+3. Drafts the next message in the sequence (reusing the same `generateOutreachMessage` used for
+   manual drafting) and queues it as a `Task`, exactly like a manually-triggered draft.
+4. Stops automatically after `followup_3` — a cold lead beyond that needs a manual reactivation
+   decision, not another automated nudge.
+
+It **never sends anything** — it only creates `draft` rows and approval `Task`s, same as the
+manual flow. Approving and marking a message sent (`PATCH /api/outreach/[id]`) is what schedules
+the *next* one: it sets `nextFollowUp` on the lead using the same sequence timing (4 days → 7
+days → 14 days between stages), which the scheduler picks up on its next tick.
+
+Logging a response (the "Follow-Up Status" panel on a lead's detail page) immediately excludes
+that lead from future scans — the sequence exists to chase silence, not to keep messaging someone
+who already replied.
+
+**Testing it without waiting days:** `POST /api/automations/run-followups` runs the same scan on
+demand (also exposed as a "Run Now" button on the dashboard) — useful for triggering a run
+immediately instead of waiting for the timer, and for backdating a lead's `nextFollowUp` in
+testing to simulate time having passed.
+
+**Config:** `FOLLOWUP_SCHEDULER_INTERVAL_MINUTES` (default 60) controls the cadence;
+`FOLLOWUP_SCHEDULER_DISABLED=1` turns it off entirely (e.g. if you wire up a real external cron
+instead, such as Vercel Cron in production, and don't want both running the same scan).
+
+## 6. Automation map (Phase 6)
 
 See `src/lib/content/workflow.ts` (`PIPELINE_STAGES`, `FULL_WORKFLOW`) and the `/playbook` page
 for the complete Lead Found → Referral Request pipeline, each step tagged Automated / AI
 Assisted / Requires Approval / Requires You Personally. The dashboard's "Pipeline Ownership"
 panel renders the same tags live.
 
-## 6. Getting started
+## 7. Getting started
 
 ```bash
 npm install
@@ -119,14 +159,18 @@ data, not real research.
 ### Environment
 
 - **`ANTHROPIC_API_KEY`** (or `ant auth login` / `ANTHROPIC_AUTH_TOKEN`) — required for lead
-  scoring, outreach drafting, mini-audits, and the full audit report generator.
+  scoring, outreach drafting, mini-audits, the full audit report generator, and the follow-up
+  scheduler. **Never commit this or paste it into a chat/ticket** — put it only in your local
+  `.env` (already gitignored) or your host's own secret manager. If a key is ever exposed that
+  way, rotate it in the Anthropic Console rather than trying to "undo" the exposure.
 - **`ANTHROPIC_MODEL`** (optional) — defaults to `claude-opus-5`.
+- **`FOLLOWUP_SCHEDULER_INTERVAL_MINUTES`** / **`FOLLOWUP_SCHEDULER_DISABLED`** (optional) — see §5.
 - No other external services are wired up. There is no email/SMS sending integration, no
   scraper, no ad account access, and no payment processor — all by design, per the operating
   rules this system was built under (never send external outreach, spend money, or access
   accounts without explicit approval).
 
-## 7. What's intentionally not built yet
+## 8. What's intentionally not built yet
 
 - **Sending.** Outreach is drafted and approval-gated, but actually sending (email/SMS/DM APIs)
   needs real accounts and explicit sign-off — wire that up only once you're ready to connect a

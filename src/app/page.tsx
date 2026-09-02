@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { OWNER_COLOR, OWNER_LABEL, PIPELINE_STAGES, stageById } from "@/lib/content/workflow";
+import { FollowUpSchedulerPanel } from "@/components/FollowUpSchedulerPanel";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +29,10 @@ async function getMetrics() {
     .sort((a, b) => (b.leadScore ?? 0) - (a.leadScore ?? 0))
     .slice(0, 5);
 
+  const followUpsDue = leads.filter(
+    (l) => l.closedStatus === "open" && l.stage === "contacted" && l.response === null && l.nextFollowUp !== null && l.nextFollowUp <= new Date()
+  );
+
   const aiAssistedStages = PIPELINE_STAGES.filter((s) => s.owner === "ai_assisted").length;
 
   return {
@@ -41,6 +46,7 @@ async function getMetrics() {
     revenue,
     tasks,
     topOpportunities,
+    followUpsDue: followUpsDue.length,
     aiAssistedStages,
   };
 }
@@ -76,12 +82,17 @@ export default async function DashboardPage() {
         <Stat label="Appointments" value={String(m.appointments)} />
         <Stat label="Proposals Out" value={String(m.proposals)} />
         <Stat label="Customers" value={String(m.customers)} />
+        <Stat label="Follow-Ups Due" value={String(m.followUpsDue)} sub="Auto-drafted on next scheduler run" />
         <Stat label="AI-Assisted Pipeline Stages" value={String(m.aiAssistedStages)} sub="of the full workflow" />
         <Stat label="Failed Automations" value="0" sub="Nothing tracked failing" />
         <Stat label="Tasks Needing Approval" value={String(m.tasks.length)} />
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="mt-8">
+        <FollowUpSchedulerPanel />
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <h2 className="text-sm font-semibold text-white">Tasks Requiring My Approval</h2>
           {m.tasks.length === 0 ? (

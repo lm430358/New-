@@ -48,6 +48,9 @@ interface Lead {
   potentialDealSize: number | null;
   stage: string;
   closedStatus: string;
+  lastContact: string | null;
+  nextFollowUp: string | null;
+  response: string | null;
   notes: string | null;
   outreachMessages: OutreachMessage[];
   auditReports: AuditReportRow[];
@@ -64,12 +67,14 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [error, setError] = useState<string | null>(null);
   const [channel, setChannel] = useState("email");
   const [stage, setStage] = useState("initial");
+  const [responseText, setResponseText] = useState("");
 
   async function load() {
     const res = await fetch(`/api/leads/${id}`);
     const data = await res.json();
     setLead(data.lead);
     setNotes(data.lead?.researchNotes ?? "");
+    setResponseText(data.lead?.response ?? "");
   }
 
   useEffect(() => {
@@ -84,6 +89,17 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ researchNotes: notes }),
+    });
+    setBusy(null);
+    load();
+  }
+
+  async function saveResponse() {
+    setBusy("response");
+    await fetch(`/api/leads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ response: responseText || null }),
     });
     setBusy(null);
     load();
@@ -324,6 +340,31 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 <option key={s.id} value={s.id}>{s.label}</option>
               ))}
             </select>
+          </Card>
+
+          <Card>
+            <h2 className="text-sm font-semibold text-white">Follow-Up Status</h2>
+            <dl className="mt-2 space-y-1.5 text-sm">
+              <Detail label="Last Contact" value={lead.lastContact ? new Date(lead.lastContact).toLocaleString() : null} />
+              <Detail
+                label="Next Follow-Up"
+                value={lead.nextFollowUp ? new Date(lead.nextFollowUp).toLocaleString() : lead.response ? "Stopped (response logged)" : null}
+              />
+            </dl>
+            <p className="mt-2 text-xs text-white/40">
+              Logging a response below stops the auto follow-up sequence for this lead — the scheduler skips any
+              lead with a response on file.
+            </p>
+            <textarea
+              className={`${inputClass} mt-2`}
+              rows={2}
+              placeholder="Paste what they said, if they replied…"
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
+            />
+            <Button variant="secondary" className="mt-2" onClick={saveResponse} disabled={busy === "response"}>
+              {busy === "response" ? "Saving…" : "Save Response"}
+            </Button>
           </Card>
 
           <Card>
