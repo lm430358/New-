@@ -279,8 +279,8 @@ data (vendors, prices, inventory, cross-references) and to perform actions (draf
 create a purchase order draft, compute profit). Prefer calling a tool over guessing whenever the
 question depends on data that could exist in the database. When you recommend vendors, only reference
 ones returned by list_vendors (saved or reference list) — never invent one. Keep replies concise and
-actionable, and use markdown formatting (short headers, bullet lists, tables) where it improves
-readability.`,
+actionable. Replies are rendered as plain text, not markdown, so do NOT use **bold**, ## headers, or
+markdown tables — use plain line breaks and "-" for list items instead.`,
   ].join("\n\n");
 
   const messages: Anthropic.MessageParam[] = conversationHistory.map((m) => ({
