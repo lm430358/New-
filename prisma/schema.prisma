@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// The lead / CRM record. One row per prospect business. `stage` drives the
+/// pipeline shown on the dashboard and is one of the ids in
+/// src/lib/content/workflow.ts (PIPELINE_STAGES) — kept as a plain string
+/// rather than a Prisma enum so the pipeline can evolve without a migration.
+model Lead {
+  id          String @id @default(cuid())
+  businessName String
+  ownerName    String?
+  industry     String
+  city         String?
+  website      String?
+  email        String?
+  phone        String?
+  instagram    String?
+  facebook     String?
+  googleBusinessProfile String?
+
+  leadSource   String? // where this lead came from (referral, directory, manual research, etc.)
+
+  // Raw, human-entered observations about the business's online presence.
+  // The AI scoring tool reads this text — it never invents findings that
+  // aren't grounded in what's actually written here.
+  researchNotes String?
+
+  problemsFound   String? // JSON string[] — weaknesses identified (from researchNotes)
+  opportunity     String? // free text — the core opportunity/angle
+  leadScore       Int?    // 1-100
+  scoreReasoning  String?
+  personalizationHook String? // one true, specific detail to reference in outreach
+
+  estimatedValue  Float?  // $ estimate of the deal if closed
+  offerRecommended String?
+  potentialDealSize Float?
+
+  stage        String   @default("new") // see PIPELINE_STAGES
+  outreachStatus String @default("not_contacted")
+  lastContact  DateTime?
+  nextFollowUp DateTime?
+  response     String?
+  appointment  DateTime?
+
+  closedStatus String  @default("open") // open | won | lost
+  notes        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  outreachMessages OutreachMessage[]
+  auditReports     AuditReport[]
+  tasks            Task[]
+}
+
+/// A single drafted outreach message tied to a lead. Nothing in this app
+/// sends messages automatically — every row is a draft the operator copies
+/// out (or exports) after approving it. `status` tracks that approval gate.
+model OutreachMessage {
+  id      String @id @default(cuid())
+  leadId  String
+  lead    Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  channel String // email | instagram_dm | facebook | sms
+  stage   String // initial | followup_1 | followup_2 | followup_3 | interested_response |
+                  // appointment_confirm | no_show | sales_followup | reactivation
+
+  subject String?
+  content String
+
+  status  String @default("draft") // draft | approved | marked_sent
+  approvedAt DateTime?
+  markedSentAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+/// A generated AI Consultant report — either tied to a lead (pre-sale mini
+/// audit) or a paying client intake (full business audit deliverable).
+model AuditReport {
+  id          String  @id @default(cuid())
+  leadId      String?
+  lead        Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  kind        String  // mini_audit | full_audit
+  businessName String
+  intake      String  // JSON of the intake answers this report was grounded in
+  report      String  // JSON of the structured report output
+
+  createdAt DateTime @default(now())
+}
+
+/// The reusable digital-product / offer catalog (Phase 8).
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  tagline     String?
+  description String?
+  price       Float
+  type        String   // one_time | recurring
+  category    String   // template | audit | strategy | consulting | subscription
+  status      String   @default("active") // active | draft | retired
+  createdAt   DateTime @default(now())
+}
+
+/// Anything the system has prepared but that requires the operator's
+/// explicit go-ahead before it happens (Phase 6 "REQUIRES MY APPROVAL").
+model Task {
+  id          String   @id @default(cuid())
+  leadId      String?
+  lead        Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  type        String   // approve_outreach | review_hot_lead | send_proposal | follow_up_call | other
+  title       String
+  description String?
+  status      String   @default("pending") // pending | approved | dismissed
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+}
