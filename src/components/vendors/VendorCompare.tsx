@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Field";
 import { Badge } from "@/components/ui/Badge";
-import { computeSourcingScore } from "@/lib/sourcingScore";
-import { formatCurrency } from "@/lib/utils";
-import type { Vendor, PriceCheck } from "@prisma/client";
+import { computeSourcingScore, matchPreferences } from "@/lib/sourcingScore";
+import { formatCurrency, safeJsonParse } from "@/lib/utils";
+import type { BusinessProfile, Vendor, PriceCheck } from "@prisma/client";
 
 type VendorFull = Vendor & { priceChecks?: PriceCheck[] };
 
@@ -14,11 +14,15 @@ export function VendorCompare() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [details, setDetails] = useState<Record<string, VendorFull>>({});
+  const [profile, setProfile] = useState<BusinessProfile | null>(null);
 
   useEffect(() => {
     fetch("/api/vendors")
       .then((r) => r.json())
       .then((d) => setVendors(d.vendors ?? []));
+    fetch("/api/business-profile")
+      .then((r) => r.json())
+      .then((d) => setProfile(d.profile ?? null));
   }, []);
 
   useEffect(() => {
@@ -35,12 +39,21 @@ export function VendorCompare() {
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : s.length < 5 ? [...s, id] : s));
   }
 
-  const rows = useMemo(
-    () =>
-      selected.map((id) => {
+  const rows = useMemo(() => {
+    const preferredSuppliers = safeJsonParse<string[]>(profile?.preferredSuppliers, []);
+    const preferredBrands = safeJsonParse<string[]>(profile?.preferredBrands, []);
+    return selected
+      .map((id) => {
         const v = details[id];
         if (!v) return null;
         const latestPrice = v.priceChecks?.[0];
+        const vendorBrands = (v.priceChecks ?? []).map((p) => p.brand).filter((b): b is string => !!b);
+        const { matchesPreferredSupplier, matchesPreferredBrand } = matchPreferences(
+          preferredSuppliers,
+          preferredBrands,
+          v.name,
+          vendorBrands
+        );
         const score = computeSourcingScore({
           wholesaleStatus: v.wholesaleStatus,
           localVerified: v.localVerified,
@@ -54,13 +67,13 @@ export function VendorCompare() {
           status: v.status,
           verificationDate: v.verificationDate,
           priceCheckCount: v.priceChecks?.length ?? 0,
-          matchesPreferredSupplier: false,
-          matchesPreferredBrand: false,
+          matchesPreferredSupplier,
+          matchesPreferredBrand,
         });
         return { v, latestPrice, score };
-      }).filter((r): r is NonNullable<typeof r> => !!r),
-    [selected, details]
-  );
+      })
+      .filter((r): r is NonNullable<typeof r> => !!r);
+  }, [selected, details, profile]);
 
   return (
     <div className="space-y-6">

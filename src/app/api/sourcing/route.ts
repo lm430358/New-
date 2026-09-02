@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getActiveBusinessProfile } from "@/lib/business";
 import { buildSmartSourcingPlan, type SourcingCandidateVendor } from "@/lib/ai/generators/smartSourcing";
-import { computeSourcingScore } from "@/lib/sourcingScore";
+import { computeSourcingScore, matchPreferences } from "@/lib/sourcingScore";
 import { describeAiError } from "@/lib/ai/errors";
+import { safeJsonParse } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   const { request } = await req.json();
@@ -18,11 +19,21 @@ export async function POST(req: NextRequest) {
   // narrowed with a real search/filter step first.
   const vendors = await prisma.vendor.findMany({
     where: { status: { not: "do_not_use" } },
-    include: { priceChecks: { orderBy: { checkedAt: "desc" }, take: 1 } },
+    include: { priceChecks: { orderBy: { checkedAt: "desc" } } },
     take: 25,
   });
 
+  const preferredSuppliers = safeJsonParse<string[]>(profile?.preferredSuppliers, []);
+  const preferredBrands = safeJsonParse<string[]>(profile?.preferredBrands, []);
+
   const candidates: SourcingCandidateVendor[] = vendors.map((v) => {
+    const vendorBrands = v.priceChecks.map((p) => p.brand).filter((b): b is string => !!b);
+    const { matchesPreferredSupplier, matchesPreferredBrand } = matchPreferences(
+      preferredSuppliers,
+      preferredBrands,
+      v.name,
+      vendorBrands
+    );
     const score = computeSourcingScore({
       wholesaleStatus: v.wholesaleStatus,
       localVerified: v.localVerified,
@@ -36,8 +47,8 @@ export async function POST(req: NextRequest) {
       status: v.status,
       verificationDate: v.verificationDate,
       priceCheckCount: v.priceChecks.length,
-      matchesPreferredSupplier: false,
-      matchesPreferredBrand: false,
+      matchesPreferredSupplier,
+      matchesPreferredBrand,
     });
     return {
       name: v.name,

@@ -5,10 +5,11 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { prisma } from "@/lib/prisma";
-import { computeSourcingScore } from "@/lib/sourcingScore";
+import { computeSourcingScore, matchPreferences } from "@/lib/sourcingScore";
 import { detectScamFlags } from "@/lib/scamFlags";
+import { getActiveBusinessProfile } from "@/lib/business";
 import { VENDOR_TYPES } from "@/lib/types";
-import { formatDate } from "@/lib/utils";
+import { formatDate, safeJsonParse } from "@/lib/utils";
 import { VendorQuickActions, PriceCheckPanel, ContactAssistantPanel } from "@/components/vendors/VendorDetailPanels";
 import { AlertTriangle, Pencil } from "lucide-react";
 
@@ -24,6 +25,17 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
   });
   if (!vendor) notFound();
 
+  const profile = await getActiveBusinessProfile();
+  const preferredSuppliers = safeJsonParse<string[]>(profile?.preferredSuppliers, []);
+  const preferredBrands = safeJsonParse<string[]>(profile?.preferredBrands, []);
+  const vendorBrands = vendor.priceChecks.map((p) => p.brand).filter((b): b is string => !!b);
+  const { matchesPreferredSupplier, matchesPreferredBrand } = matchPreferences(
+    preferredSuppliers,
+    preferredBrands,
+    vendor.name,
+    vendorBrands
+  );
+
   const score = computeSourcingScore({
     wholesaleStatus: vendor.wholesaleStatus,
     localVerified: vendor.localVerified,
@@ -37,8 +49,8 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
     status: vendor.status,
     verificationDate: vendor.verificationDate,
     priceCheckCount: vendor.priceChecks.length,
-    matchesPreferredSupplier: false,
-    matchesPreferredBrand: false,
+    matchesPreferredSupplier,
+    matchesPreferredBrand,
   });
 
   const flags = detectScamFlags({

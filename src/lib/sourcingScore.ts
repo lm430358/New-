@@ -1,5 +1,31 @@
 import type { SourcingScoreResult } from "@/lib/types";
 
+/**
+ * Case-insensitive, substring-based match between the business profile's
+ * preferred suppliers/brands and a given vendor's name and logged price-check
+ * brands. Deliberately simple and explainable — no fuzzy matching magic.
+ */
+export function matchPreferences(
+  preferredSuppliers: string[],
+  preferredBrands: string[],
+  vendorName: string,
+  vendorBrands: string[]
+): { matchesPreferredSupplier: boolean; matchesPreferredBrand: boolean } {
+  const name = vendorName.trim().toLowerCase();
+  const matchesPreferredSupplier = preferredSuppliers.some((s) => {
+    const pref = s.trim().toLowerCase();
+    return pref.length > 0 && (name.includes(pref) || pref.includes(name));
+  });
+
+  const brands = vendorBrands.filter(Boolean).map((b) => b.trim().toLowerCase());
+  const matchesPreferredBrand = preferredBrands.some((b) => {
+    const pref = b.trim().toLowerCase();
+    return pref.length > 0 && brands.some((vb) => vb.includes(pref) || pref.includes(vb));
+  });
+
+  return { matchesPreferredSupplier, matchesPreferredBrand };
+}
+
 export interface VendorForScoring {
   wholesaleStatus: string;
   localVerified: boolean;

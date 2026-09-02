@@ -11,6 +11,7 @@ export async function findResellOpportunities(
     schema: ResellOpportunitySchema,
     schemaName: "ResellOpportunities",
     systemExtra: buildBusinessContext(profile),
+    maxTokens: 4096,
     prompt: `Suggest 4-6 general categories of automotive parts that may be reasonable resale
 opportunities for this business, reasoning from well-known general patterns (common wear items,
 popular/high-volume vehicle platforms, typical demand seasonality, shipping-cost-to-value ratio,

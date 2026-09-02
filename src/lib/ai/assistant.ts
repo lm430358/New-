@@ -4,9 +4,10 @@ import { ACCURACY_RULES, buildBusinessContext } from "@/lib/ai/context";
 import { prisma } from "@/lib/prisma";
 import { getActiveBusinessProfile } from "@/lib/business";
 import { calculateProfit } from "@/lib/profit";
-import { computeSourcingScore } from "@/lib/sourcingScore";
+import { computeSourcingScore, matchPreferences } from "@/lib/sourcingScore";
 import { VENDOR_REFERENCE_LIST } from "@/lib/vendorSeed";
 import { draftVendorMessage, type ContactPurpose } from "@/lib/ai/generators/vendorContact";
+import { safeJsonParse } from "@/lib/utils";
 
 type ToolDef = Anthropic.Tool;
 
@@ -156,6 +157,16 @@ async function runTool(name: string, input: Record<string, unknown>): Promise<un
         include: { priceChecks: { orderBy: { checkedAt: "desc" }, take: 10 } },
       });
       if (!vendor) return { error: "Vendor not found." };
+      const profile = await getActiveBusinessProfile();
+      const preferredSuppliers = safeJsonParse<string[]>(profile?.preferredSuppliers, []);
+      const preferredBrands = safeJsonParse<string[]>(profile?.preferredBrands, []);
+      const vendorBrands = vendor.priceChecks.map((p) => p.brand).filter((b): b is string => !!b);
+      const { matchesPreferredSupplier, matchesPreferredBrand } = matchPreferences(
+        preferredSuppliers,
+        preferredBrands,
+        vendor.name,
+        vendorBrands
+      );
       const score = computeSourcingScore({
         wholesaleStatus: vendor.wholesaleStatus,
         localVerified: vendor.localVerified,
@@ -169,8 +180,8 @@ async function runTool(name: string, input: Record<string, unknown>): Promise<un
         status: vendor.status,
         verificationDate: vendor.verificationDate,
         priceCheckCount: vendor.priceChecks.length,
-        matchesPreferredSupplier: false,
-        matchesPreferredBrand: false,
+        matchesPreferredSupplier,
+        matchesPreferredBrand,
       });
       return { vendor, sourcingScore: score };
     }

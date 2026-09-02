@@ -32,10 +32,15 @@ export async function buildSmartSourcingPlan(
         .join("\n")
     : "(none — the user's vendor database has no matching candidates yet)";
 
+  // Output scales with how many candidates there are to rank/explain — give it
+  // enough room that a longer vendor list can't get cut off mid-JSON.
+  const maxTokens = Math.min(8192, 2048 + candidates.length * 250);
+
   return generateStructured({
     schema: SmartSourcingPlanSchema,
     schemaName: "SmartSourcingPlan",
     systemExtra: buildBusinessContext(profile),
+    maxTokens,
     prompt: `The user made this sourcing request:
 "${request}"
 
