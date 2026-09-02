@@ -174,6 +174,9 @@ Branding: ${intake.branding}
 Conversion problems: ${intake.conversionProblems}`,
     schema: FullAuditReportSchema,
     effort: "high",
-    maxTokens: 8000,
+    // This schema is large (13 sections including three separate 30/60/90-day
+    // plans) and "high" effort spends part of the budget on reasoning before
+    // any output tokens — 8000 measured truncated mid-JSON in testing.
+    maxTokens: 20000,
   });
 }

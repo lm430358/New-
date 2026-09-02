@@ -21,16 +21,26 @@ export async function generateStructured<T>({
   maxTokens?: number;
   effort?: Effort;
 }): Promise<T> {
-  const response = await anthropic.messages.parse({
-    model: MODEL,
-    max_tokens: maxTokens,
-    system,
-    output_config: {
-      format: zodOutputFormat(schema),
-      effort,
-    },
-    messages: [{ role: "user", content: prompt }],
-  });
+  let response;
+  try {
+    response = await anthropic.messages.parse({
+      model: MODEL,
+      max_tokens: maxTokens,
+      system,
+      output_config: {
+        format: zodOutputFormat(schema),
+        effort,
+      },
+      messages: [{ role: "user", content: prompt }],
+    });
+  } catch (err) {
+    if (err instanceof Error && /parse structured output/i.test(err.message)) {
+      throw new AiGenerationError(
+        `The AI response was cut off before it finished (likely exceeded the ${maxTokens}-token budget for this generator) and couldn't be parsed. Try again, or raise maxTokens for this call.`
+      );
+    }
+    throw err;
+  }
 
   if (response.stop_reason === "refusal") {
     throw new AiGenerationError(
