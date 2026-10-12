@@ -118,7 +118,8 @@ model Message {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  role      String // user | assistant
-  content   String
+  role        String // user | assistant
+  content     String
+  toolOutputs String? // JSON AssistantToolOutput[] — the result cards an assistant turn produced
   createdAt DateTime @default(now())
 }

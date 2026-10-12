@@ -52,7 +52,12 @@ export async function POST(request: Request) {
     await prisma.message.createMany({
       data: [
         { conversationId: conversation.id, role: "user", content: message },
-        { conversationId: conversation.id, role: "assistant", content: reply },
+        {
+          conversationId: conversation.id,
+          role: "assistant",
+          content: reply,
+          toolOutputs: toolOutputs.length > 0 ? JSON.stringify(toolOutputs) : null,
+        },
       ],
     });
     await prisma.conversation.update({ where: { id: conversation.id }, data: { updatedAt: new Date() } });

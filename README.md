@@ -78,7 +78,8 @@ ContentCalendar   — saved calendars (days, start date, JSON entries)
 Campaign          — saved campaigns (input brief + full generated strategy, JSON)
 LeadMagnet        — saved lead magnets (format, title, JSON content)
 Conversation       — Smart Assistant chat threads
-Message           — messages within a conversation (role + content)
+Message           — messages within a conversation (role + content, plus the JSON result
+                     cards an assistant turn produced so they re-render after a reload)
 ```
 
 Full definitions live in `prisma/schema.prisma`. All structured AI output is stored as JSON
@@ -239,6 +240,9 @@ npm run dev
 Open http://localhost:3000, fill in your Business Profile, then use any tool or the Smart
 Assistant. The `docker`-free SQLite setup means there's nothing else to stand up.
 
+After pulling changes that touch `prisma/schema.prisma`, re-run `npx prisma db push` to
+update your local database (new columns are nullable, so existing data is kept).
+
 ### Known trade-offs (by design, not oversight)
 
 - Single active business profile at a time (see Architecture above for why, and how to extend
@@ -246,7 +250,4 @@ Assistant. The `docker`-free SQLite setup means there's nothing else to stand up
 - Bulk generators (Everything/Campaign/Repurpose/Calendar) don't auto-score every sub-piece —
   quality-check is one click away per piece instead, to keep those already-heavy requests from
   multiplying further.
-- The Smart Assistant's chat history persists as plain text; the rich result cards it produces
-  in a turn aren't re-hydrated from history after a page reload (the conversation text is,
-  the generated content itself lives in the Content Library once saved).
 - Trend research is intentionally not wired to live web search — see section 4.

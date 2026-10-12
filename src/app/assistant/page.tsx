@@ -41,10 +41,11 @@ export default function AssistantPage() {
         .then((json) => {
           if (json?.conversation) {
             setMessages(
-              json.conversation.messages.map((m: { id: string; role: string; content: string }) => ({
+              json.conversation.messages.map((m: ChatMessage) => ({
                 id: m.id,
                 role: m.role,
                 content: m.content,
+                toolOutputs: m.toolOutputs,
               }))
             );
           }
