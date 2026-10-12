@@ -154,6 +154,11 @@ Automatic Quality Check (score + breakdown + flags) — or on-demand for bulk re
 Edit inline, Save to the Content Library, or Export (copy / .txt / .docx / .pdf / .csv)
 ```
 
+Calendars, campaigns, and lead magnets are saved automatically when generated. Each of
+those pages shows a **Saved** list underneath the form, so past results can be reopened (a
+reopened campaign also restores its brief) or deleted without regenerating. Reopened lead
+magnets show an on-demand quality check rather than the original auto-score.
+
 ## 6. Complete file structure
 
 ```
@@ -190,11 +195,12 @@ src/
       library/route.ts  library/[id]/route.ts  library/[id]/duplicate/route.ts
       export/{txt,docx,pdf,csv}/route.ts
       assistant/route.ts  assistant/[id]/route.ts
+      saved/[kind]/route.ts  saved/[kind]/[id]/route.ts   # calendars | campaigns | lead-magnets
   components/
-    Sidebar.tsx  TopBar.tsx  BusinessProfileForm.tsx  ContentResultCard.tsx
+    Sidebar.tsx  TopBar.tsx  BusinessProfileForm.tsx  ContentResultCard.tsx  SavedHistory.tsx
     ui/{Button,Card,Field,Badge}.tsx
   lib/
-    prisma.ts  business.ts  types.ts  validation.ts  format.ts  download.ts  utils.ts
+    prisma.ts  business.ts  saved.ts  types.ts  validation.ts  format.ts  download.ts  utils.ts
     ai/
       client.ts  context.ts  generate.ts  schemas.ts  quality.ts  autoScore.ts  assistant.ts
       generators/{pillars,social,video,writing,calendar,campaign,repurpose,everything,ideas,improve}.ts

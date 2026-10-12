@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldGroup, Select, Textarea } from "@/components/ui/Field";
 import { ContentResultCard } from "@/components/ContentResultCard";
+import { SavedHistory } from "@/components/SavedHistory";
 import { CONTENT_GOALS } from "@/lib/types";
 import { socialPostToText, videoScriptToText, emailToText } from "@/lib/format";
 import type { CampaignContent } from "@/lib/ai/schemas";
@@ -20,12 +21,15 @@ export default function CampaignPage() {
   const [loading, setLoading] = useState(false);
   const [campaign, setCampaign] = useState<CampaignContent | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [historyKey, setHistoryKey] = useState(0);
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setCampaign(null);
+    setActiveId(null);
     try {
       const res = await fetch("/api/generate/campaign", {
         method: "POST",
@@ -35,11 +39,32 @@ export default function CampaignPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
       setCampaign(json.campaign);
+      setActiveId(json.id);
+      setHistoryKey((k) => k + 1);
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleOpenSaved(item: unknown) {
+    const saved = item as {
+      id: string;
+      campaign: CampaignContent;
+      input: { productOrService?: string; targetCustomer?: string; offer?: string; price?: string; goal?: string; lengthDays?: number } | null;
+    };
+    setCampaign(saved.campaign);
+    setActiveId(saved.id);
+    setError(null);
+    // Restore the brief too, so tweaking and regenerating starts from the saved inputs.
+    const input = saved.input ?? {};
+    if (input.productOrService) setProductOrService(input.productOrService);
+    if (input.targetCustomer) setTargetCustomer(input.targetCustomer);
+    if (input.offer) setOffer(input.offer);
+    setPrice(input.price ?? "");
+    if (input.goal) setGoal(input.goal);
+    if (input.lengthDays) setLengthDays(input.lengthDays);
   }
 
   return (
@@ -104,8 +129,10 @@ export default function CampaignPage() {
         </CardBody>
       </Card>
 
+      <SavedHistory kind="campaigns" label="campaigns" refreshKey={historyKey} activeId={activeId} onOpen={handleOpenSaved} />
+
       {campaign && (
-        <div className="space-y-4">
+        <div key={activeId ?? "new"} className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>{campaign.title}</CardTitle>

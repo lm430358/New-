@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const result = await withAutoScore(ctx, leadMagnet, leadMagnetToText, { contentType: "lead_magnet" });
 
     const profile = await getActiveBusinessProfile();
-    await prisma.leadMagnet.create({
+    const saved = await prisma.leadMagnet.create({
       data: {
         businessProfileId: profile?.id,
         format: parsed.data.format,
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, id: saved.id });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 502 });
   }

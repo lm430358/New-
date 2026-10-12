@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldGroup, Select } from "@/components/ui/Field";
 import { Badge } from "@/components/ui/Badge";
+import { SavedHistory } from "@/components/SavedHistory";
 import { CALENDAR_LENGTHS } from "@/lib/types";
 import type { CalendarContent } from "@/lib/ai/schemas";
 import { downloadFromApi } from "@/lib/download";
@@ -18,6 +19,8 @@ export default function CalendarPage() {
   const [calendar, setCalendar] = useState<CalendarContent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [historyKey, setHistoryKey] = useState(0);
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
@@ -25,6 +28,7 @@ export default function CalendarPage() {
     setError(null);
     setCalendar(null);
     setSaved(false);
+    setActiveId(null);
     try {
       const res = await fetch("/api/generate/calendar", {
         method: "POST",
@@ -34,11 +38,21 @@ export default function CalendarPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
       setCalendar(json.calendar);
+      setActiveId(json.id);
+      setHistoryKey((k) => k + 1);
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleOpenSaved(item: unknown) {
+    const saved = item as { id: string; calendar: CalendarContent };
+    setCalendar(saved.calendar);
+    setActiveId(saved.id);
+    setSaved(false);
+    setError(null);
   }
 
   async function handleExportCsv() {
@@ -118,6 +132,8 @@ export default function CalendarPage() {
           </form>
         </CardBody>
       </Card>
+
+      <SavedHistory kind="calendars" label="calendars" refreshKey={historyKey} activeId={activeId} onOpen={handleOpenSaved} />
 
       {calendar && (
         <Card>
