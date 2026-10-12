@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Building2, ChevronRight } from "lucide-react";
+import { MobileNav } from "@/components/Sidebar";
 
 interface ProfileSummary {
   businessName: string;
@@ -30,7 +31,6 @@ const ROUTE_TITLES: Record<string, string> = {
 
 export function TopBar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [profile, setProfile] = useState<ProfileSummary | null>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -55,19 +55,8 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200 px-4 md:px-8 py-3.5 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
-        <select
-          aria-label="Navigate"
-          className="md:hidden min-w-0 max-w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5 bg-white"
-          value={pathname}
-          onChange={(e) => router.push(e.target.value)}
-        >
-          {Object.entries(ROUTE_TITLES).map(([href, label]) => (
-            <option key={href} value={href}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <h1 className="hidden md:block text-lg font-semibold text-slate-900 truncate">{title}</h1>
+        <MobileNav />
+        <h1 className="text-base md:text-lg font-semibold text-slate-900 truncate">{title}</h1>
       </div>
 
       <Link
