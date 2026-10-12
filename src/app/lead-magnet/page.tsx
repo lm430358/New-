@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldGroup, Select } from "@/components/ui/Field";
 import { ContentResultCard } from "@/components/ContentResultCard";
+import { Markdown } from "@/components/Markdown";
 import { SavedHistory } from "@/components/SavedHistory";
 import { LEAD_MAGNET_FORMATS } from "@/lib/types";
 import { leadMagnetToText, socialPostToText } from "@/lib/format";
@@ -120,7 +121,7 @@ export default function LeadMagnetPage() {
                   ))}
                 </ol>
               </div>
-              <div className="prose-content text-slate-700 border-t border-slate-100 pt-3">{result.content.content}</div>
+              <Markdown className="text-slate-700 border-t border-slate-100 pt-3">{result.content.content}</Markdown>
               <p className="text-violet-600">CTA: {result.content.cta}</p>
             </div>
           </ContentResultCard>

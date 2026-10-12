@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldGroup } from "@/components/ui/Field";
 import { ContentResultCard } from "@/components/ContentResultCard";
+import { Markdown } from "@/components/Markdown";
 import { websiteCopyToText, blogPostToText, emailToText } from "@/lib/format";
 import type { WebsiteCopyBundle, BlogPost, EmailContent, QualityReport } from "@/lib/ai/schemas";
 import { cn } from "@/lib/utils";
@@ -180,7 +181,7 @@ function BlogTool() {
           rawBody={result.content}
           initialScore={result.quality}
         >
-          <div className="prose-content text-sm text-slate-700">{result.content.body}</div>
+          <Markdown className="text-sm text-slate-700">{result.content.body}</Markdown>
         </ContentResultCard>
       )}
     </div>

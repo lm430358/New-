@@ -19,6 +19,8 @@
     "pdf-lib": "^1.17.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "uuid": "^14.0.2",
     "zod": "^4.5.4",
     "zod-to-json-schema": "^3.25.2"
