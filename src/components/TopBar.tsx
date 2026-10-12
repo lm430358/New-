@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Building2, ChevronRight, Menu } from "lucide-react";
+import { Building2, ChevronRight } from "lucide-react";
 
 interface ProfileSummary {
   businessName: string;
@@ -57,7 +57,7 @@ export function TopBar() {
       <div className="flex items-center gap-3 min-w-0">
         <select
           aria-label="Navigate"
-          className="md:hidden text-sm border border-slate-300 rounded-lg px-2 py-1.5"
+          className="md:hidden min-w-0 max-w-full text-sm border border-slate-300 rounded-lg px-2 py-1.5 bg-white"
           value={pathname}
           onChange={(e) => router.push(e.target.value)}
         >
@@ -67,8 +67,7 @@ export function TopBar() {
             </option>
           ))}
         </select>
-        <Menu className="h-4 w-4 text-slate-300 md:hidden" />
-        <h1 className="text-lg font-semibold text-slate-900 truncate">{title}</h1>
+        <h1 className="hidden md:block text-lg font-semibold text-slate-900 truncate">{title}</h1>
       </div>
 
       <Link
@@ -79,7 +78,7 @@ export function TopBar() {
         {!loaded ? (
           <span className="text-slate-400">Loading…</span>
         ) : profile ? (
-          <span className="max-w-[160px] truncate">{profile.businessName}</span>
+          <span className="max-w-[110px] sm:max-w-[160px] truncate">{profile.businessName}</span>
         ) : (
           <span className="text-violet-600">Set up your business profile</span>
         )}
