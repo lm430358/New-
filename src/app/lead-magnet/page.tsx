@@ -11,6 +11,7 @@ import { LEAD_MAGNET_FORMATS } from "@/lib/types";
 import { leadMagnetToText, socialPostToText } from "@/lib/format";
 import type { LeadMagnetContent, QualityReport } from "@/lib/ai/schemas";
 import { BookOpenCheck } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 interface Result {
   content: LeadMagnetContent;
@@ -39,8 +40,7 @@ export default function LeadMagnetPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ format, topic }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
       setHistoryKey((k) => k + 1);
     } catch (err) {

@@ -10,6 +10,7 @@ import { websiteCopyToText, blogPostToText, emailToText } from "@/lib/format";
 import type { WebsiteCopyBundle, BlogPost, EmailContent, QualityReport } from "@/lib/ai/schemas";
 import { cn } from "@/lib/utils";
 import { Globe } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 type Tab = "website" | "blog" | "email";
 
@@ -69,8 +70,7 @@ function WebsiteCopyTool() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ focus: focus || undefined }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setCopy(json.copy);
     } catch (err) {
       setError((err as Error).message);
@@ -150,8 +150,7 @@ function BlogTool() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
     } catch (err) {
       setError((err as Error).message);
@@ -206,8 +205,7 @@ function EmailTool() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic, purpose: purpose || undefined }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
     } catch (err) {
       setError((err as Error).message);

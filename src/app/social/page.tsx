@@ -8,6 +8,7 @@ import { ContentResultCard } from "@/components/ContentResultCard";
 import { PLATFORMS, CONTENT_GOALS } from "@/lib/types";
 import type { SocialPost, QualityReport } from "@/lib/ai/schemas";
 import { Sparkles } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 const SOCIAL_PLATFORMS = PLATFORMS.filter((p) => !["email", "blog", "general"].includes(p.id));
 
@@ -36,8 +37,7 @@ export default function SocialContentPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ platform, topic, goal: goal || undefined }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
     } catch (err) {
       setError((err as Error).message);

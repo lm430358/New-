@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Building2, ChevronRight } from "lucide-react";
 import { MobileNav } from "@/components/Sidebar";
+import { PROFILE_UPDATED_EVENT } from "@/lib/events";
 
 interface ProfileSummary {
   businessName: string;
@@ -36,17 +37,21 @@ export function TopBar() {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/business-profile")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (active) {
-          setProfile(data?.profile ?? null);
-          setLoaded(true);
-        }
-      })
-      .catch(() => active && setLoaded(true));
+    const load = () =>
+      fetch("/api/business-profile")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (active) {
+            setProfile(data?.profile ?? null);
+            setLoaded(true);
+          }
+        })
+        .catch(() => active && setLoaded(true));
+    load();
+    window.addEventListener(PROFILE_UPDATED_EVENT, load);
     return () => {
       active = false;
+      window.removeEventListener(PROFILE_UPDATED_EVENT, load);
     };
   }, [pathname]);
 

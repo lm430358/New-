@@ -9,6 +9,7 @@ import { Markdown } from "@/components/Markdown";
 import { CONTENT_GOALS } from "@/lib/types";
 import type { SalesContent, QualityReport } from "@/lib/ai/schemas";
 import { DollarSign } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 interface Result {
   content: SalesContent;
@@ -35,8 +36,7 @@ export default function SalesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ offerName, price: price || undefined, goal: goal || undefined }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
     } catch (err) {
       setError((err as Error).message);

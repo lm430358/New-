@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label, FieldGroup, Select } from "@/components/ui/Field";
 import { BRAND_VOICES, CONTENT_GOALS, PLATFORMS } from "@/lib/types";
 import { Plus, Trash2, Sparkles, CheckCircle2 } from "lucide-react";
+import { readApiJson } from "@/lib/api";
+import { PROFILE_UPDATED_EVENT } from "@/lib/events";
 
 interface ProfileData {
   id?: string;
@@ -60,6 +62,8 @@ export function BusinessProfileForm() {
   const [saved, setSaved] = useState(false);
   const [pillars, setPillars] = useState<{ name: string; description: string }[]>([]);
   const [pillarsLoading, setPillarsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pillarsError, setPillarsError] = useState<string | null>(null);
   const [socialRows, setSocialRows] = useState<[string, string][]>([["", ""]]);
 
   useEffect(() => {
@@ -126,12 +130,14 @@ export function BusinessProfileForm() {
       else set.add(value);
       return { ...d, [key]: Array.from(set) };
     });
+    setSaved(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
+    setError(null);
     const socialAccounts = Object.fromEntries(
       socialRows.filter(([k, v]) => k.trim() && v.trim())
     );
@@ -140,26 +146,34 @@ export function BusinessProfileForm() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const res = await fetch("/api/business-profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, socialAccounts, competitors }),
-    });
-    const json = await res.json();
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/business-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, socialAccounts, competitors }),
+      });
+      const json = await readApiJson(res);
       setData((d) => ({ ...d, id: json.profile.id }));
       setSaved(true);
+      // The top bar fetches the profile on navigation only; tell it the name may have changed.
+      window.dispatchEvent(new Event(PROFILE_UPDATED_EVENT));
       router.refresh();
+    } catch (err) {
+      setError(`Couldn't save your profile: ${(err as Error).message}`);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   async function handleGeneratePillars() {
     setPillarsLoading(true);
+    setPillarsError(null);
     try {
       const res = await fetch("/api/business-profile/pillars", { method: "POST" });
-      const json = await res.json();
-      if (res.ok) setPillars(json.pillars);
+      const json = await readApiJson(res);
+      setPillars(json.pillars);
+    } catch (err) {
+      setPillarsError(`Couldn't generate pillars: ${(err as Error).message}`);
     } finally {
       setPillarsLoading(false);
     }
@@ -431,6 +445,11 @@ export function BusinessProfileForm() {
             </Button>
           </CardHeader>
           <CardBody>
+            {pillarsError && (
+              <p role="alert" className="text-sm text-red-600 mb-3">
+                {pillarsError}
+              </p>
+            )}
             {pillars.length ? (
               <div className="grid sm:grid-cols-2 gap-3">
                 {pillars.map((p) => (
@@ -453,6 +472,11 @@ export function BusinessProfileForm() {
         <Button type="submit" size="lg" loading={saving}>
           Save Business Profile
         </Button>
+        {error && (
+          <span role="alert" className="text-red-600 text-sm bg-white/90 rounded px-1">
+            {error}
+          </span>
+        )}
         {saved && (
           <span className="text-emerald-600 text-sm flex items-center gap-1.5">
             <CheckCircle2 className="h-4 w-4" /> Saved

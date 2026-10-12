@@ -7,7 +7,7 @@ import { Input, Select } from "@/components/ui/Field";
 import { Badge, ScoreBadge } from "@/components/ui/Badge";
 import { flattenLibraryBody } from "@/lib/format";
 import { downloadFromApi } from "@/lib/download";
-import { formatDate } from "@/lib/utils";
+import { copyToClipboard, formatDate, slugify } from "@/lib/utils";
 import {
   Star,
   Pencil,
@@ -44,6 +44,7 @@ const TYPE_OPTIONS = [
   "lead_magnet",
   "campaign_asset",
   "calendar",
+  "repurpose_output",
   "improved_content",
   "idea",
 ];
@@ -54,6 +55,7 @@ export default function LibraryPage() {
   const [type, setType] = useState("");
   const [favoriteOnly, setFavoriteOnly] = useState(false);
   const [search, setSearch] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -62,8 +64,12 @@ export default function LibraryPage() {
     if (favoriteOnly) params.set("favorite", "true");
     if (search) params.set("q", search);
     fetch(`/api/library?${params.toString()}`)
-      .then((r) => r.json())
-      .then((json) => setItems(json.items ?? []))
+      .then(async (r) => {
+        if (!r.ok) throw new Error();
+        setItems((await r.json()).items ?? []);
+        setError(null);
+      })
+      .catch(() => setError("Couldn't load your library. Please refresh to try again."))
       .finally(() => setLoading(false));
   }, [type, favoriteOnly, search]);
 
@@ -73,23 +79,44 @@ export default function LibraryPage() {
   }, [load]);
 
   async function toggleFavorite(item: LibraryItem) {
-    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, favorite: !i.favorite } : i)));
-    await fetch(`/api/library/${item.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ favorite: !item.favorite }),
-    });
+    const setFavorite = (favorite: boolean) =>
+      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, favorite } : i)));
+    setFavorite(!item.favorite);
+    setError(null);
+    try {
+      const res = await fetch(`/api/library/${item.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favorite: !item.favorite }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      setFavorite(item.favorite);
+      setError("Couldn't update favorite. Please try again.");
+    }
   }
 
   async function handleDuplicate(item: LibraryItem) {
-    const res = await fetch(`/api/library/${item.id}/duplicate`, { method: "POST" });
-    if (res.ok) load();
+    setError(null);
+    try {
+      const res = await fetch(`/api/library/${item.id}/duplicate`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      load();
+    } catch {
+      setError("Couldn't duplicate that item. Please try again.");
+    }
   }
 
   async function handleDelete(item: LibraryItem) {
     if (!confirm(`Delete "${item.title}"? This can't be undone.`)) return;
-    await fetch(`/api/library/${item.id}`, { method: "DELETE" });
-    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    setError(null);
+    try {
+      const res = await fetch(`/api/library/${item.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+    } catch {
+      setError("Couldn't delete that item. Please try again.");
+    }
   }
 
   return (
@@ -118,6 +145,12 @@ export default function LibraryPage() {
           </button>
         </CardBody>
       </Card>
+
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       {loading ? (
         <p className="text-sm text-slate-400 text-center py-12">Loading your library…</p>
@@ -161,22 +194,43 @@ function LibraryCard({
   const [draftText, setDraftText] = useState(() => flattenLibraryBody(JSON.parse(item.body)));
   const [saving, setSaving] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const previewText = flattenLibraryBody(JSON.parse(item.body));
 
+  function handleCancelEdit() {
+    setDraftTitle(item.title);
+    setDraftText(previewText);
+    setEditing(false);
+    setCardError(null);
+  }
+
+  async function handleCopy() {
+    try {
+      await copyToClipboard(previewText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCardError("Couldn't copy to the clipboard — select the text and copy it manually.");
+    }
+  }
+
   async function handleSaveEdit() {
     setSaving(true);
+    setCardError(null);
     try {
       const res = await fetch(`/api/library/${item.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: draftTitle, body: { text: draftText } }),
+        body: JSON.stringify({ title: draftTitle.trim(), body: { text: draftText } }),
       });
       const json = await res.json();
-      if (res.ok) {
-        onUpdated(json.item);
-        setEditing(false);
-      }
+      if (!res.ok) throw new Error();
+      onUpdated(json.item);
+      setEditing(false);
+    } catch {
+      setCardError("Couldn't save your edits. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -184,7 +238,12 @@ function LibraryCard({
 
   async function handleExport(format: "txt" | "docx" | "pdf") {
     setExportOpen(false);
-    await downloadFromApi(`/api/export/${format}`, { title: item.title, content: previewText }, `${item.title}.${format}`);
+    setCardError(null);
+    try {
+      await downloadFromApi(`/api/export/${format}`, { title: item.title, content: previewText }, `${slugify(item.title)}.${format}`);
+    } catch {
+      setCardError(`Couldn't export as .${format}. Please try again.`);
+    }
   }
 
   return (
@@ -220,20 +279,27 @@ function LibraryCard({
           <p className="prose-content text-sm text-slate-600 mt-3 line-clamp-6">{previewText}</p>
         )}
 
+        {cardError && (
+          <p role="alert" className="mt-3 text-xs text-red-600">
+            {cardError}
+          </p>
+        )}
+
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
           {editing ? (
             <>
-              <Button size="sm" onClick={handleSaveEdit} loading={saving}>
+              <Button size="sm" onClick={handleSaveEdit} loading={saving} disabled={!draftTitle.trim()}>
                 <Check className="h-3.5 w-3.5" /> Save
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
                 <X className="h-3.5 w-3.5" /> Cancel
               </Button>
             </>
           ) : (
             <>
-              <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(previewText)}>
-                <CopyIcon className="h-3.5 w-3.5" /> Copy
+              <Button size="sm" variant="outline" onClick={handleCopy}>
+                {copied ? <Check className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                {copied ? "Copied" : "Copy"}
               </Button>
               <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
                 <Pencil className="h-3.5 w-3.5" /> Edit

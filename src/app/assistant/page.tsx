@@ -8,6 +8,7 @@ import { ContentResultCard } from "@/components/ContentResultCard";
 import { Send, MessageCircle, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AssistantToolOutput } from "@/lib/ai/assistant";
+import { readApiJson } from "@/lib/api";
 
 interface ChatMessage {
   id: string;
@@ -25,6 +26,27 @@ const SUGGESTIONS = [
 
 const STORAGE_KEY = "assistant-conversation-id";
 
+// localStorage can throw (blocked storage, some private modes); the chat still works without it.
+const storage = {
+  get: () => {
+    try {
+      return localStorage.getItem(STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  },
+  set: (id: string) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, id);
+    } catch {}
+  },
+  clear: () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  },
+};
+
 export default function AssistantPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -33,7 +55,7 @@ export default function AssistantPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+    const stored = storage.get();
     if (stored) {
       setConversationId(stored);
       fetch(`/api/assistant/${stored}`)
@@ -69,11 +91,10 @@ export default function AssistantPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversationId: conversationId ?? undefined, message: text }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       if (json.conversationId && json.conversationId !== conversationId) {
         setConversationId(json.conversationId);
-        localStorage.setItem(STORAGE_KEY, json.conversationId);
+        storage.set(json.conversationId);
       }
       setMessages((prev) => [
         ...prev,
@@ -92,7 +113,7 @@ export default function AssistantPage() {
   function handleNewConversation() {
     setConversationId(null);
     setMessages([]);
-    localStorage.removeItem(STORAGE_KEY);
+    storage.clear();
   }
 
   return (

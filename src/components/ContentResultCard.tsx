@@ -6,6 +6,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge, ScoreBadge } from "@/components/ui/Badge";
 import { downloadFromApi } from "@/lib/download";
+import { copyToClipboard, slugify } from "@/lib/utils";
 import type { QualityReport } from "@/lib/ai/schemas";
 
 export interface ContentResultCardProps {
@@ -21,14 +22,18 @@ export interface ContentResultCardProps {
   children?: React.ReactNode;
 }
 
-function useCopy() {
+function useCopy(onError: (message: string) => void) {
   const [copied, setCopied] = useState(false);
   return {
     copied,
     copy: async (text: string) => {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      try {
+        await copyToClipboard(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      } catch {
+        onError("Couldn't copy to the clipboard — select the text and copy it manually.");
+      }
     },
   };
 }
@@ -45,8 +50,9 @@ export function ContentResultCard({
   initialScore,
   children,
 }: ContentResultCardProps) {
-  const { copied, copy } = useCopy();
-  const imageCopy = useCopy();
+  const [error, setError] = useState<string | null>(null);
+  const { copied, copy } = useCopy(setError);
+  const imageCopy = useCopy(setError);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [score, setScore] = useState<QualityReport | undefined>(initialScore);
@@ -56,6 +62,7 @@ export function ContentResultCard({
 
   async function handleSave() {
     setSaving(true);
+    setError(null);
     try {
       const res = await fetch("/api/library", {
         method: "POST",
@@ -71,7 +78,10 @@ export function ContentResultCard({
           sourceTool,
         }),
       });
-      if (res.ok) setSaved(true);
+      if (!res.ok) throw new Error();
+      setSaved(true);
+    } catch {
+      setError("Couldn't save to the library. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -80,6 +90,7 @@ export function ContentResultCard({
   async function handleCheckQuality() {
     setCheckingScore(true);
     setScoreOpen(true);
+    setError(null);
     try {
       const res = await fetch("/api/quality-check", {
         method: "POST",
@@ -87,7 +98,11 @@ export function ContentResultCard({
         body: JSON.stringify({ content: copyText, platform, contentType }),
       });
       const json = await res.json();
-      if (res.ok) setScore(json.report);
+      if (!res.ok) throw new Error(typeof json.error === "string" ? json.error : undefined);
+      setScore(json.report);
+    } catch (err) {
+      setScoreOpen(false);
+      setError(`Quality check failed${(err as Error).message ? `: ${(err as Error).message}` : "."}`);
     } finally {
       setCheckingScore(false);
     }
@@ -95,7 +110,12 @@ export function ContentResultCard({
 
   async function handleExport(format: "txt" | "docx" | "pdf") {
     setExportOpen(false);
-    await downloadFromApi(`/api/export/${format}`, { title, content: copyText }, `${slugify(title)}.${format}`);
+    setError(null);
+    try {
+      await downloadFromApi(`/api/export/${format}`, { title, content: copyText }, `${slugify(title)}.${format}`);
+    } catch {
+      setError(`Couldn't export as .${format}. Please try again.`);
+    }
   }
 
   return (
@@ -182,6 +202,12 @@ export function ContentResultCard({
           </div>
         )}
 
+        {error && (
+          <p role="alert" className="mt-4 text-xs text-red-600">
+            {error}
+          </p>
+        )}
+
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
           <Button type="button" size="sm" variant="outline" onClick={() => copy(copyText)}>
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
@@ -222,12 +248,4 @@ export function ContentResultCard({
       </CardBody>
     </Card>
   );
-}
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 60) || "content";
 }

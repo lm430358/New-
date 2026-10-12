@@ -10,6 +10,7 @@ import { CONTENT_GOALS } from "@/lib/types";
 import { socialPostToText, videoScriptToText, emailToText } from "@/lib/format";
 import type { CampaignContent } from "@/lib/ai/schemas";
 import { Megaphone } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 export default function CampaignPage() {
   const [productOrService, setProductOrService] = useState("");
@@ -36,8 +37,7 @@ export default function CampaignPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productOrService, targetCustomer, offer, price: price || undefined, goal, lengthDays }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setCampaign(json.campaign);
       setActiveId(json.id);
       setHistoryKey((k) => k + 1);
