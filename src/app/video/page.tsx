@@ -9,6 +9,7 @@ import { VIDEO_LENGTHS } from "@/lib/types";
 import type { VideoScript, HookSet, QualityReport } from "@/lib/ai/schemas";
 import { hookSetToText } from "@/lib/format";
 import { Clapperboard, ListVideo } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 interface ScriptResult {
   content: VideoScript;
@@ -37,8 +38,7 @@ export default function VideoScriptPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic, platform, lengthLabel }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
     } catch (err) {
       setError((err as Error).message);
@@ -60,8 +60,7 @@ export default function VideoScriptPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setHooks(json.hooks);
     } catch (err) {
       setError((err as Error).message);

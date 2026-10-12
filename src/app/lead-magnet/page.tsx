@@ -5,15 +5,20 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldGroup, Select } from "@/components/ui/Field";
 import { ContentResultCard } from "@/components/ContentResultCard";
+import { Markdown } from "@/components/Markdown";
+import { SavedHistory } from "@/components/SavedHistory";
 import { LEAD_MAGNET_FORMATS } from "@/lib/types";
 import { leadMagnetToText, socialPostToText } from "@/lib/format";
 import type { LeadMagnetContent, QualityReport } from "@/lib/ai/schemas";
 import { BookOpenCheck } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 interface Result {
   content: LeadMagnetContent;
   text: string;
-  quality: QualityReport;
+  // Absent when reopening a saved lead magnet — the card offers an on-demand check instead.
+  quality?: QualityReport;
+  id?: string;
 }
 
 export default function LeadMagnetPage() {
@@ -22,6 +27,7 @@ export default function LeadMagnetPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [historyKey, setHistoryKey] = useState(0);
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
@@ -34,14 +40,21 @@ export default function LeadMagnetPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ format, topic }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
+      setHistoryKey((k) => k + 1);
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleOpenSaved(item: unknown) {
+    const saved = item as { id: string; format: string; content: LeadMagnetContent };
+    setFormat(saved.format);
+    setResult({ id: saved.id, content: saved.content, text: leadMagnetToText(saved.content) });
+    setError(null);
   }
 
   return (
@@ -79,8 +92,16 @@ export default function LeadMagnetPage() {
         </CardBody>
       </Card>
 
+      <SavedHistory
+        kind="lead-magnets"
+        label="lead magnets"
+        refreshKey={historyKey}
+        activeId={result?.id}
+        onOpen={handleOpenSaved}
+      />
+
       {result && (
-        <div className="space-y-4">
+        <div key={result.id ?? "new"} className="space-y-4">
           <ContentResultCard
             title={result.content.title}
             badges={[LEAD_MAGNET_FORMATS.find((f) => f.id === format)?.label ?? format]}
@@ -100,7 +121,7 @@ export default function LeadMagnetPage() {
                   ))}
                 </ol>
               </div>
-              <div className="prose-content text-slate-700 border-t border-slate-100 pt-3">{result.content.content}</div>
+              <Markdown className="text-slate-700 border-t border-slate-100 pt-3">{result.content.content}</Markdown>
               <p className="text-violet-600">CTA: {result.content.cta}</p>
             </div>
           </ContentResultCard>

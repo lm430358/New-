@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getActiveBusinessContext } from "@/lib/business";
 import { generateHooks } from "@/lib/ai/generators";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({ topic: z.string().min(1) });
 
@@ -14,6 +15,6 @@ export async function POST(request: Request) {
     const hooks = await generateHooks(ctx, parsed.data);
     return NextResponse.json({ hooks });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

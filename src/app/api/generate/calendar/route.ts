@@ -3,10 +3,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getActiveBusinessContext, getActiveBusinessProfile } from "@/lib/business";
 import { generateCalendar } from "@/lib/ai/generators";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({
   days: z.number().int().positive().max(90),
-  startDate: z.string().optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be YYYY-MM-DD").optional(),
   title: z.string().optional(),
 });
 
@@ -32,6 +33,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ calendar, id: saved.id });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

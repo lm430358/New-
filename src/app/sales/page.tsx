@@ -5,9 +5,11 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldGroup, Select } from "@/components/ui/Field";
 import { ContentResultCard } from "@/components/ContentResultCard";
+import { Markdown } from "@/components/Markdown";
 import { CONTENT_GOALS } from "@/lib/types";
 import type { SalesContent, QualityReport } from "@/lib/ai/schemas";
 import { DollarSign } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 interface Result {
   content: SalesContent;
@@ -34,8 +36,7 @@ export default function SalesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ offerName, price: price || undefined, goal: goal || undefined }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
     } catch (err) {
       setError((err as Error).message);
@@ -102,7 +103,7 @@ export default function SalesPage() {
             <div>
               <p className="font-semibold text-slate-800">{result.content.salesPage.headline}</p>
               <p className="text-slate-500">{result.content.salesPage.subheadline}</p>
-              <p className="prose-content text-slate-700 mt-2">{result.content.salesPage.body}</p>
+              <Markdown className="text-slate-700 mt-2">{result.content.salesPage.body}</Markdown>
               <p className="text-violet-600 mt-1">CTA: {result.content.salesPage.cta}</p>
             </div>
             <div>

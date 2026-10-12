@@ -14,6 +14,7 @@ import {
 } from "@/lib/format";
 import type { EverythingPackage } from "@/lib/ai/schemas";
 import { Sparkles } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 export default function EverythingPage() {
   const [idea, setIdea] = useState("");
@@ -32,8 +33,7 @@ export default function EverythingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idea }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setPkg(json.package);
     } catch (err) {
       setError((err as Error).message);

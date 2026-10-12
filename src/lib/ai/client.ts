@@ -6,7 +6,7 @@ import Anthropic from "@anthropic-ai/sdk";
 export const anthropic = new Anthropic();
 
 // Deployers can override the model via env without touching code. Defaults to
-// Anthropic's most capable widely released model.
-export const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5";
+// Claude Opus 5.5.
+export const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5-5";
 
 export type Effort = "low" | "medium" | "high" | "xhigh" | "max";

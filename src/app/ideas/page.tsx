@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import type { ContentIdeas } from "@/lib/ai/schemas";
 import { Lightbulb } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 export default function IdeasPage() {
   const [loading, setLoading] = useState(false);
@@ -17,8 +18,7 @@ export default function IdeasPage() {
     setError(null);
     try {
       const res = await fetch("/api/generate/ideas", { method: "POST" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setIdeas(json.ideas);
     } catch (err) {
       setError((err as Error).message);

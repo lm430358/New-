@@ -8,6 +8,8 @@ import type {
   WebsiteCopyBundle,
   SalesContent,
   LeadMagnetContent,
+  CalendarContent,
+  RepurposeOutput,
 } from "@/lib/ai/schemas";
 
 export function socialPostToText(post: SocialPost): string {
@@ -92,6 +94,40 @@ export function leadMagnetToText(l: LeadMagnetContent): string {
  * duck-types the common shapes so the library can render a readable preview
  * (and a copy/export string) without needing to know each item's exact type.
  */
+export function calendarToText(c: CalendarContent): string {
+  const days = c.entries.map((e) =>
+    [
+      `Day ${e.day} · ${e.date} · ${e.platform} · ${e.contentType}`,
+      `Pillar: ${e.pillar} · Goal: ${e.goal}`,
+      `Topic: ${e.topic}`,
+      `Hook: ${e.hook}`,
+      e.captionOrScript,
+      `CTA: ${e.cta}`,
+      `Visual: ${e.visualIdea}`,
+      e.hashtags.length ? e.hashtags.map((h) => `#${h}`).join(" ") : "",
+    ]
+      .filter(Boolean)
+      .join("\n")
+  );
+  return [c.title, ...days].join("\n\n---\n\n");
+}
+
+export function repurposeToText(r: RepurposeOutput): string {
+  const section = (heading: string, body: string) => `== ${heading} ==\n\n${body}`;
+  return [
+    `Source summary: ${r.sourceSummary}`,
+    section("Facebook post", socialPostToText(r.facebookPost)),
+    section("LinkedIn post", socialPostToText(r.linkedinPost)),
+    ...r.instagramCaptions.map((p, i) => section(`Instagram caption ${i + 1}`, socialPostToText(p))),
+    section("TikTok ideas", r.tiktokIdeas.map((t, i) => `${i + 1}. ${t.concept}\n   Hook: ${t.hook}`).join("\n")),
+    ...r.shortFormScripts.map((v, i) => section(`Short-form script ${i + 1}`, videoScriptToText(v))),
+    section("Email", emailToText(r.email)),
+    section("Blog post", blogPostToText(r.blogPost)),
+    section("Carousel", carouselToText(r.carousel)),
+    section("Hooks", hookSetToText(r.hooks)),
+  ].join("\n\n");
+}
+
 export function flattenLibraryBody(body: unknown): string {
   if (body == null) return "";
   if (typeof body === "string") return body;
@@ -100,7 +136,8 @@ export function flattenLibraryBody(body: unknown): string {
 
   if (typeof b.text === "string") return b.text;
   if (typeof b.improved === "string") return b.improved;
-  if (Array.isArray(b.entries)) return `${b.entries.length}-day content calendar: ${String(b.title ?? "")}`;
+  if (Array.isArray(b.entries)) return calendarToText(body as CalendarContent);
+  if (typeof b.sourceSummary === "string" && b.facebookPost) return repurposeToText(body as RepurposeOutput);
   if (b.salesPage) return salesContentToText(body as SalesContent);
   if (b.homepageHero) return websiteCopyToText(body as WebsiteCopyBundle);
   if (Array.isArray(b.promotionalPosts) && typeof b.content === "string") return leadMagnetToText(body as LeadMagnetContent);

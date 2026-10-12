@@ -5,6 +5,7 @@ import { getActiveBusinessContext, getActiveBusinessProfile } from "@/lib/busine
 import { generateLeadMagnet } from "@/lib/ai/generators";
 import { withAutoScore } from "@/lib/ai/autoScore";
 import { leadMagnetToText } from "@/lib/format";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({ format: z.string().min(1), topic: z.string().min(1) });
 
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
     const result = await withAutoScore(ctx, leadMagnet, leadMagnetToText, { contentType: "lead_magnet" });
 
     const profile = await getActiveBusinessProfile();
-    await prisma.leadMagnet.create({
+    const saved = await prisma.leadMagnet.create({
       data: {
         businessProfileId: profile?.id,
         format: parsed.data.format,
@@ -27,8 +28,8 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, id: saved.id });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

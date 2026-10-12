@@ -27,7 +27,7 @@ Prisma (SQLite) for persistence and the Anthropic Claude API for generation.
 └───────┬───────────────┬───────┘
         │               │
 ┌───────▼──────┐ ┌──────▼─────────────┐
-│ Prisma/SQLite │ │ Claude API (Opus 5)│
+│ Prisma/SQLite │ │ Claude Opus 5.5    │
 │ Business data │ │ Structured outputs │
 │ Content library│ │ + tool-use agent  │
 └───────────────┘ └────────────────────┘
@@ -60,7 +60,7 @@ Design choices worth calling out:
 | Framework | Next.js 16 (App Router, TypeScript) | UI + API in one deployable app |
 | Styling | Tailwind CSS v4 | Fast, consistent, no component library lock-in |
 | Database | SQLite via Prisma ORM | Zero-config for a single-workspace tool; swap the `datasource` to Postgres/MySQL for multi-user deployments without touching app code |
-| AI | `@anthropic-ai/sdk`, model `claude-opus-5` (configurable via `ANTHROPIC_MODEL`) | Structured outputs (`messages.parse` + Zod) for every generator, plus a manual tool-use loop for the Smart Assistant |
+| AI | `@anthropic-ai/sdk`, model `claude-opus-5-5` (configurable via `ANTHROPIC_MODEL`) | Structured outputs (`messages.parse` + Zod) for every generator, plus a manual tool-use loop for the Smart Assistant |
 | Validation | Zod | Both AI output schemas and API request validation |
 | Export | `docx`, `pdf-lib`, hand-rolled CSV | Real .docx/.pdf/.csv files, not just plain text |
 | Icons | `lucide-react` | Lightweight, consistent icon set |
@@ -78,7 +78,8 @@ ContentCalendar   — saved calendars (days, start date, JSON entries)
 Campaign          — saved campaigns (input brief + full generated strategy, JSON)
 LeadMagnet        — saved lead magnets (format, title, JSON content)
 Conversation       — Smart Assistant chat threads
-Message           — messages within a conversation (role + content)
+Message           — messages within a conversation (role + content, plus the JSON result
+                     cards an assistant turn produced so they re-render after a reload)
 ```
 
 Full definitions live in `prisma/schema.prisma`. All structured AI output is stored as JSON
@@ -154,6 +155,11 @@ Automatic Quality Check (score + breakdown + flags) — or on-demand for bulk re
 Edit inline, Save to the Content Library, or Export (copy / .txt / .docx / .pdf / .csv)
 ```
 
+Calendars, campaigns, and lead magnets are saved automatically when generated. Each of
+those pages shows a **Saved** list underneath the form, so past results can be reopened (a
+reopened campaign also restores its brief) or deleted without regenerating. Reopened lead
+magnets show an on-demand quality check rather than the original auto-score.
+
 ## 6. Complete file structure
 
 ```
@@ -190,11 +196,12 @@ src/
       library/route.ts  library/[id]/route.ts  library/[id]/duplicate/route.ts
       export/{txt,docx,pdf,csv}/route.ts
       assistant/route.ts  assistant/[id]/route.ts
+      saved/[kind]/route.ts  saved/[kind]/[id]/route.ts   # calendars | campaigns | lead-magnets
   components/
-    Sidebar.tsx  TopBar.tsx  BusinessProfileForm.tsx  ContentResultCard.tsx
+    Sidebar.tsx  TopBar.tsx  BusinessProfileForm.tsx  ContentResultCard.tsx  SavedHistory.tsx
     ui/{Button,Card,Field,Badge}.tsx
   lib/
-    prisma.ts  business.ts  types.ts  validation.ts  format.ts  download.ts  utils.ts
+    prisma.ts  business.ts  saved.ts  types.ts  validation.ts  format.ts  download.ts  utils.ts
     ai/
       client.ts  context.ts  generate.ts  schemas.ts  quality.ts  autoScore.ts  assistant.ts
       generators/{pillars,social,video,writing,calendar,campaign,repurpose,everything,ideas,improve}.ts
@@ -215,9 +222,10 @@ reusable.
 
 - **`ANTHROPIC_API_KEY`** (or an `ant auth login` profile / `ANTHROPIC_AUTH_TOKEN`) — required
   for every `/api/generate/*`, `/api/quality-check`, `/api/business-profile/pillars`, and
-  `/api/assistant` call. Without it those routes return a clean `502` with the SDK's
-  authentication error rather than crashing.
-- **`ANTHROPIC_MODEL`** (optional) — override the model (defaults to `claude-opus-5`).
+  `/api/assistant` call. Without it those routes return an error explaining how to set the
+  key rather than crashing. Other AI failures (rejected key, rate limit, timeout, network)
+  are mapped to plain-language messages in `lib/ai/errors.ts`.
+- **`ANTHROPIC_MODEL`** (optional) — override the model (defaults to `claude-opus-5-5`).
 - No other external services are required. Export endpoints run entirely server-side
   (`docx`, `pdf-lib`) with no third-party API calls.
 
@@ -233,6 +241,9 @@ npm run dev
 Open http://localhost:3000, fill in your Business Profile, then use any tool or the Smart
 Assistant. The `docker`-free SQLite setup means there's nothing else to stand up.
 
+After pulling changes that touch `prisma/schema.prisma`, re-run `npx prisma db push` to
+update your local database (new columns are nullable, so existing data is kept).
+
 ### Known trade-offs (by design, not oversight)
 
 - Single active business profile at a time (see Architecture above for why, and how to extend
@@ -240,7 +251,4 @@ Assistant. The `docker`-free SQLite setup means there's nothing else to stand up
 - Bulk generators (Everything/Campaign/Repurpose/Calendar) don't auto-score every sub-piece —
   quality-check is one click away per piece instead, to keep those already-heavy requests from
   multiplying further.
-- The Smart Assistant's chat history persists as plain text; the rich result cards it produces
-  in a turn aren't re-hydrated from history after a page reload (the conversation text is,
-  the generated content itself lives in the Content Library once saved).
 - Trend research is intentionally not wired to live web search — see section 4.

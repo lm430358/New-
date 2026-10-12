@@ -37,8 +37,12 @@ export async function POST(request: Request) {
     preferredPlatforms: JSON.stringify(data.preferredPlatforms ?? []),
   };
 
-  const profile = data.id
-    ? await prisma.businessProfile.update({ where: { id: data.id }, data: payload })
+  // A stale id (e.g. from another tab after a reset) falls back to creating a new profile.
+  const existing = data.id
+    ? await prisma.businessProfile.findUnique({ where: { id: data.id }, select: { id: true } })
+    : null;
+  const profile = existing
+    ? await prisma.businessProfile.update({ where: { id: existing.id }, data: payload })
     : await prisma.businessProfile.create({ data: payload });
 
   await setActiveBusinessProfile(profile.id);

@@ -4,6 +4,7 @@ import { getActiveBusinessContext } from "@/lib/business";
 import { generateCarousel } from "@/lib/ai/generators";
 import { withAutoScore } from "@/lib/ai/autoScore";
 import { carouselToText } from "@/lib/format";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({ topic: z.string().min(1) });
 
@@ -20,6 +21,6 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

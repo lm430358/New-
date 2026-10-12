@@ -15,6 +15,7 @@ import {
 } from "@/lib/format";
 import type { RepurposeOutput } from "@/lib/ai/schemas";
 import { Recycle } from "lucide-react";
+import { readApiJson } from "@/lib/api";
 
 export default function RepurposePage() {
   const [sourceContent, setSourceContent] = useState("");
@@ -33,8 +34,7 @@ export default function RepurposePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sourceContent }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setOutput(json.output);
     } catch (err) {
       setError((err as Error).message);

@@ -7,6 +7,7 @@ import { Textarea, Label, FieldGroup } from "@/components/ui/Field";
 import { ContentResultCard } from "@/components/ContentResultCard";
 import { CONTENT_IMPROVER_ACTIONS } from "@/lib/types";
 import type { ImprovedContent, QualityReport } from "@/lib/ai/schemas";
+import { readApiJson } from "@/lib/api";
 
 interface Result {
   content: ImprovedContent;
@@ -36,8 +37,7 @@ export default function ImprovePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, action }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setResult(json);
     } catch (err) {
       setError((err as Error).message);

@@ -1,23 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { format } from "date-fns";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label, FieldGroup, Select } from "@/components/ui/Field";
 import { Badge } from "@/components/ui/Badge";
+import { SavedHistory } from "@/components/SavedHistory";
 import { CALENDAR_LENGTHS } from "@/lib/types";
 import type { CalendarContent } from "@/lib/ai/schemas";
 import { downloadFromApi } from "@/lib/download";
 import { CalendarDays, FileDown, Save, Check } from "lucide-react";
+import { readApiJson } from "@/lib/api";
+
+const subscribeNever = () => () => {};
+const localToday = () => format(new Date(), "yyyy-MM-dd");
 
 export default function CalendarPage() {
   const [days, setDays] = useState<number>(7);
-  const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
+  // Today in the user's own time zone. Read via useSyncExternalStore so the prerendered
+  // HTML doesn't bake in the build date (React won't patch a mismatched input value).
+  const today = useSyncExternalStore(subscribeNever, localToday, () => "");
+  const [pickedStartDate, setStartDate] = useState<string | null>(null);
+  const startDate = pickedStartDate ?? today;
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [calendar, setCalendar] = useState<CalendarContent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [historyKey, setHistoryKey] = useState(0);
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
@@ -25,20 +38,32 @@ export default function CalendarPage() {
     setError(null);
     setCalendar(null);
     setSaved(false);
+    setActionError(null);
+    setActiveId(null);
     try {
       const res = await fetch("/api/generate/calendar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ days, startDate, title: title || undefined }),
+        body: JSON.stringify({ days, startDate: startDate || undefined, title: title || undefined }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error?.formErrors?.[0] ?? json.error ?? "Something went wrong");
+      const json = await readApiJson(res);
       setCalendar(json.calendar);
+      setActiveId(json.id);
+      setHistoryKey((k) => k + 1);
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleOpenSaved(item: unknown) {
+    const saved = item as { id: string; calendar: CalendarContent };
+    setCalendar(saved.calendar);
+    setActiveId(saved.id);
+    setSaved(false);
+    setActionError(null);
+    setError(null);
   }
 
   async function handleExportCsv() {
@@ -57,12 +82,18 @@ export default function CalendarPage() {
       "Visual Idea": e.visualIdea,
       Hashtags: e.hashtags.join(" "),
     }));
-    await downloadFromApi("/api/export/csv", { rows, filename: "content-calendar.csv" }, "content-calendar.csv");
+    setActionError(null);
+    try {
+      await downloadFromApi("/api/export/csv", { rows, filename: "content-calendar.csv" }, "content-calendar.csv");
+    } catch {
+      setActionError("Couldn't export the CSV. Please try again.");
+    }
   }
 
   async function handleSaveToLibrary() {
     if (!calendar) return;
-    await fetch("/api/library", {
+    setActionError(null);
+    const res = await fetch("/api/library", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -71,8 +102,9 @@ export default function CalendarPage() {
         body: calendar,
         sourceTool: "calendar",
       }),
-    });
-    setSaved(true);
+    }).catch(() => null);
+    if (res?.ok) setSaved(true);
+    else setActionError("Couldn't save to the library. Please try again.");
   }
 
   return (
@@ -119,6 +151,8 @@ export default function CalendarPage() {
         </CardBody>
       </Card>
 
+      <SavedHistory kind="calendars" label="calendars" refreshKey={historyKey} activeId={activeId} onOpen={handleOpenSaved} />
+
       {calendar && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -133,6 +167,11 @@ export default function CalendarPage() {
               </Button>
             </div>
           </CardHeader>
+          {actionError && (
+            <p role="alert" className="px-5 pt-3 text-sm text-red-600">
+              {actionError}
+            </p>
+          )}
           <CardBody className="overflow-x-auto">
             <div className="space-y-3 min-w-[720px]">
               {calendar.entries.map((entry) => (

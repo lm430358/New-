@@ -97,6 +97,10 @@ const tiles = [
   },
 ];
 
+// Reads the active business profile from the database, so it must render per request
+// rather than being prerendered at build time (which baked in "no profile yet").
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const profile = await getActiveBusinessProfile();
 
