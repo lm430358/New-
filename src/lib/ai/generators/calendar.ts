@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { addDays, format } from "date-fns";
 import type { BusinessContext, ContentPillar } from "@/lib/types";
 import { CONTENT_GOALS } from "@/lib/types";
 import { generateStructured } from "../generate";
@@ -23,6 +22,16 @@ interface DaySkeleton {
   goal: string;
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Calendar dates are plain YYYY-MM-DD values carried as UTC midnight. Formatting them
+ * in the server's local zone shifts every day by one west of UTC, so stay in UTC.
+ */
+function utcDateString(start: Date, offsetDays: number): string {
+  return new Date(start.getTime() + offsetDays * DAY_MS).toISOString().slice(0, 10);
+}
+
 function buildSkeleton(ctx: BusinessContext, days: number, startDate: Date): DaySkeleton[] {
   const platforms = ctx.preferredPlatforms.length ? ctx.preferredPlatforms : DEFAULT_PLATFORMS;
   const pillars = ctx.contentPillars.length ? ctx.contentPillars : DEFAULT_PILLARS;
@@ -32,7 +41,7 @@ function buildSkeleton(ctx: BusinessContext, days: number, startDate: Date): Day
   for (let i = 0; i < days; i++) {
     skeleton.push({
       day: i + 1,
-      date: format(addDays(startDate, i), "yyyy-MM-dd"),
+      date: utcDateString(startDate, i),
       platform: platforms[i % platforms.length],
       pillar: pillars[(i + Math.floor(i / platforms.length)) % pillars.length].name,
       goal: goals[i % goals.length],
