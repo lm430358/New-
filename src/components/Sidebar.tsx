@@ -18,6 +18,8 @@ import {
   Lightbulb,
   Library,
   MessageCircle,
+  Users,
+  Images,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +68,14 @@ const groups: NavGroup[] = [
     items: [
       { href: "/library", label: "Content Library", icon: Library },
       { href: "/assistant", label: "Smart Assistant", icon: MessageCircle },
+    ],
+  },
+  {
+    title: "AI Characters",
+    items: [
+      { href: "/characters", label: "Character Library", icon: Users },
+      { href: "/characters/new", label: "New Character", icon: Sparkles },
+      { href: "/scenes", label: "Scenes Gallery", icon: Images },
     ],
   },
 ];

@@ -26,6 +26,9 @@ const ROUTE_TITLES: Record<string, string> = {
   "/ideas": "Content Ideas",
   "/library": "Content Library",
   "/assistant": "Smart Assistant",
+  "/characters": "Character Library",
+  "/characters/new": "New Character",
+  "/scenes": "Scenes Gallery",
 };
 
 export function TopBar() {

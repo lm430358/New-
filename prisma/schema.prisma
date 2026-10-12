@@ -122,3 +122,140 @@ model Message {
   content   String
   createdAt DateTime @default(now())
 }
+
+// ============================================================================
+// AI Character Generation Platform
+//
+// A separate feature area in the same app/database. A `Character` is the
+// durable identity record — everything a future generation needs to bring
+// that character back is stored here or on its related rows, never just a
+// cached text prompt. See CHARACTERS.md for the full design rationale.
+// ============================================================================
+
+/// The character's identity record: structured profile + the canonical
+/// appearance description reused verbatim in every future generation, plus
+/// the provider-specific identity-lock state (reference images and/or a
+/// trained LoRA).
+model Character {
+  id   String @id @default(cuid())
+  name String
+
+  style      String // realistic | semi_realistic | cartoon | anime | 3d_animated | other
+  species    String  @default("human") // human | animal | fantasy | robot | other
+  age        String?
+  gender     String?
+  occupation String?
+
+  personalityTraits String // JSON string[]
+  personalitySummary String? // 2-4 sentence prose summary
+  background         String? // backstory / bio
+  voiceDescription   String? // descriptive notes on how the character sounds (tone, pace, accent)
+  voiceProviderId    String? // future: a TTS provider's voice id once assigned
+
+  // The identity anchor. `physicalDescription` is the single canonical
+  // appearance paragraph (face, skin tone, hair, body type, distinguishing
+  // marks) that is injected UNCHANGED into every prompt for this character —
+  // this is what keeps "memory" real instead of being re-guessed each time.
+  physicalDescription String
+  faceDescriptor       String? // tighter face-only description, used to weight identity-lock prompts
+  defaultOutfitDescription String?
+
+  seed               Int? // base seed, reused as one (minor) consistency signal
+  negativePrompt     String? // persistent negative prompt (things that must never appear)
+
+  identityLockMode String  @default("reference_image") // reference_image | lora | seed_only
+  loraModelId      String? // set once a per-character LoRA has finished training
+  loraStatus       String  @default("none") // none | training | ready | failed
+  loraTrainingId   String? // provider-side training job id, for polling
+
+  sourceDescription String // the original free-text description the user typed, kept for provenance only — never used as a substitute for the structured fields above
+
+  referenceImages    CharacterReferenceImage[]
+  outfits            CharacterOutfit[]
+  generations        GenerationCharacter[]
+  relationshipsFrom  CharacterRelationship[]  @relation("CharacterFrom")
+  relationshipsTo    CharacterRelationship[]  @relation("CharacterTo")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Visual reference material for a character — the real identity anchor.
+/// Either generated once as a "character sheet" or uploaded by the user.
+model CharacterReferenceImage {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  url       String
+  kind      String // generated_sheet | user_upload
+  angle     String? // front | three_quarter | side | closeup | full_body
+  isPrimary Boolean @default(false) // the canonical face reference used for identity-lock conditioning
+
+  createdAt DateTime @default(now())
+}
+
+/// A named outfit a character can be generated in, independent of identity.
+model CharacterOutfit {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String
+  imageUrl    String?
+
+  createdAt DateTime @default(now())
+}
+
+/// A directed relationship between two characters (e.g. Marcus -> Tina:
+/// "customer"). Stored once per direction so the description can be
+/// asymmetric ("Tina's mechanic" vs. "Marcus's regular customer").
+model CharacterRelationship {
+  id String @id @default(cuid())
+
+  fromCharacterId String
+  fromCharacter   Character @relation("CharacterFrom", fields: [fromCharacterId], references: [id], onDelete: Cascade)
+  toCharacterId   String
+  toCharacter     Character @relation("CharacterTo", fields: [toCharacterId], references: [id], onDelete: Cascade)
+
+  relationshipType String // e.g. coworker, family, rival, friend, comedy-duo
+  description      String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([fromCharacterId, toCharacterId])
+}
+
+/// One generated image (character sheet or scene). Keeps the exact compiled
+/// prompt and provider/model used so results are reproducible and auditable.
+model Generation {
+  id   String @id @default(cuid())
+  type String // character_sheet | scene
+
+  prompt         String
+  negativePrompt String?
+  provider       String // e.g. replicate
+  model          String // underlying model id used
+  sceneParams    String? // JSON: pose, expression, environment, cameraAngle, lighting, outfitId
+
+  status       String  @default("pending") // pending | completed | failed
+  imageUrl     String?
+  errorMessage String?
+
+  characters GenerationCharacter[]
+
+  createdAt DateTime @default(now())
+}
+
+/// Join table: which characters appear in a given generation.
+model GenerationCharacter {
+  id           String     @id @default(cuid())
+  generationId String
+  generation   Generation @relation(fields: [generationId], references: [id], onDelete: Cascade)
+  characterId  String
+  character    Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  outfitId     String? // which of that character's outfits was used, if any
+
+  @@unique([generationId, characterId])
+}
