@@ -18,6 +18,8 @@ import {
   emailToText,
   blogPostToText,
   hookSetToText,
+  calendarToText,
+  repurposeToText,
 } from "@/lib/format";
 
 export interface AssistantToolOutput {
@@ -176,7 +178,7 @@ async function executeTool(name: string, input: Record<string, unknown>, ctx: Bu
       const summaryForModel = `Repurposed into: Facebook post, LinkedIn post, 3 Instagram captions, 5 TikTok ideas, 5 short-form scripts, an email, a blog post, a carousel, and 10 hooks. Source summary: ${output.sourceSummary}`;
       return {
         forModel: summaryForModel,
-        output: { title: "Repurposed content package", contentType: "repurpose_output", content: output, text: summaryForModel },
+        output: { title: "Repurposed content package", contentType: "repurpose_output", content: output, text: repurposeToText(output) },
       };
     }
     case "generate_content_calendar": {
@@ -185,7 +187,7 @@ async function executeTool(name: string, input: Record<string, unknown>, ctx: Bu
       const summaryForModel = `Generated a ${days}-day calendar titled "${calendar.title}" with ${calendar.entries.length} entries rotating across platforms and pillars.`;
       return {
         forModel: summaryForModel,
-        output: { title: calendar.title, contentType: "calendar", content: calendar, text: summaryForModel },
+        output: { title: calendar.title, contentType: "calendar", content: calendar, text: calendarToText(calendar) },
       };
     }
     default:
@@ -216,7 +218,8 @@ export async function runAssistantTurn(
   for (let iteration = 0; iteration < 6; iteration++) {
     const response = await anthropic.messages.create({
       model: MODEL,
-      max_tokens: 4000,
+      // Thinking shares this budget with the reply and tool calls.
+      max_tokens: 16000,
       system,
       tools,
       messages,
@@ -230,31 +233,38 @@ export async function runAssistantTurn(
     messages.push({ role: "assistant", content: response.content });
 
     if (response.stop_reason !== "tool_use") {
-      const text = response.content.find((b): b is Anthropic.TextBlock => b.type === "text")?.text ?? "";
+      const text = response.content
+        .filter((b): b is Anthropic.TextBlock => b.type === "text")
+        .map((b) => b.text)
+        .join("\n\n")
+        .trim();
+      if (response.stop_reason === "max_tokens") {
+        return { reply: text ? `${text}\n\n(Reply cut short — ask me to continue.)` : "That reply ran too long — try a narrower request.", toolOutputs };
+      }
       return { reply: text || "Done!", toolOutputs };
     }
 
     const toolUseBlocks = response.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-    const toolResults: Anthropic.ToolResultBlockParam[] = [];
-
-    for (const block of toolUseBlocks) {
-      try {
-        const { forModel, output } = await executeTool(block.name, block.input as Record<string, unknown>, ctx);
-        if (output) {
-          if (Array.isArray(output)) toolOutputs.push(...output);
-          else toolOutputs.push(output);
-        }
-        toolResults.push({ type: "tool_result", tool_use_id: block.id, content: forModel });
-      } catch (err) {
-        toolResults.push({
+    // Each tool is a full generation call, so run them concurrently; results keep call order.
+    const settled = await Promise.allSettled(
+      toolUseBlocks.map((block) => executeTool(block.name, block.input as Record<string, unknown>, ctx))
+    );
+    const toolResults: Anthropic.ToolResultBlockParam[] = settled.map((result, i) => {
+      const block = toolUseBlocks[i];
+      if (result.status === "rejected") {
+        return {
           type: "tool_result",
           tool_use_id: block.id,
-          content: `Error: ${(err as Error).message}`,
+          content: `Error: ${(result.reason as Error)?.message ?? "tool failed"}`,
           is_error: true,
-        });
+        };
       }
-    }
+      const { forModel, output } = result.value;
+      if (output) toolOutputs.push(...(Array.isArray(output) ? output : [output]));
+      return { type: "tool_result", tool_use_id: block.id, content: forModel };
+    });
 
+    // All results go back in a single user message.
     messages.push({ role: "user", content: toolResults });
   }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getActiveBusinessContext } from "@/lib/business";
 import { generateWebsiteCopy } from "@/lib/ai/generators";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({ focus: z.string().optional() });
 
@@ -14,6 +15,6 @@ export async function POST(request: Request) {
     const copy = await generateWebsiteCopy(ctx, parsed.data);
     return NextResponse.json({ copy });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

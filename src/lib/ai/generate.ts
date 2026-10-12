@@ -4,6 +4,10 @@ import { anthropic, MODEL, type Effort } from "./client";
 
 export class AiGenerationError extends Error {}
 
+// Thinking is always on for current models and shares `max_tokens` with the answer,
+// so small per-generator budgets can run out mid-JSON. Never go below this floor.
+const MIN_MAX_TOKENS = 16000;
+
 /**
  * Calls Claude and parses its response directly into the given Zod schema
  * using the Messages API's structured-output mode. This is the backbone of
@@ -25,7 +29,7 @@ export async function generateStructured<T>({
 }): Promise<T> {
   const response = await anthropic.messages.parse({
     model: MODEL,
-    max_tokens: maxTokens,
+    max_tokens: Math.max(maxTokens, MIN_MAX_TOKENS),
     system,
     output_config: {
       format: zodOutputFormat(schema),
@@ -38,6 +42,10 @@ export async function generateStructured<T>({
     throw new AiGenerationError(
       "The AI declined to generate this content. Try rephrasing the request."
     );
+  }
+
+  if (response.stop_reason === "max_tokens") {
+    throw new AiGenerationError("The AI ran out of room before finishing. Try a shorter or simpler request.");
   }
 
   if (!response.parsed_output) {

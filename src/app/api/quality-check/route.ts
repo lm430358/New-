@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getActiveBusinessContext } from "@/lib/business";
 import { scoreContent } from "@/lib/ai/quality";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({
   content: z.string().min(1),
@@ -19,6 +20,6 @@ export async function POST(request: Request) {
     const report = await scoreContent(ctx, parsed.data);
     return NextResponse.json({ report });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

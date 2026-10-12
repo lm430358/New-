@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getActiveBusinessContext } from "@/lib/business";
 import { generateRepurposeOutput } from "@/lib/ai/generators";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({ sourceContent: z.string().min(20, "Paste at least a few sentences of source content") });
 
@@ -14,6 +15,6 @@ export async function POST(request: Request) {
     const output = await generateRepurposeOutput(ctx, parsed.data.sourceContent);
     return NextResponse.json({ output });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

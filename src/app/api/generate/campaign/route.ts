@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getActiveBusinessContext, getActiveBusinessProfile } from "@/lib/business";
 import { generateCampaign } from "@/lib/ai/generators";
+import { aiErrorResponse } from "@/lib/ai/errors";
 
 const bodySchema = z.object({
   productOrService: z.string().min(1),
@@ -33,6 +34,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ campaign, id: saved.id });
   } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 502 });
+    return aiErrorResponse(err);
   }
 }

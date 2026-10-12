@@ -27,7 +27,7 @@ Prisma (SQLite) for persistence and the Anthropic Claude API for generation.
 └───────┬───────────────┬───────┘
         │               │
 ┌───────▼──────┐ ┌──────▼─────────────┐
-│ Prisma/SQLite │ │ Claude API (Opus 5)│
+│ Prisma/SQLite │ │ Claude Opus 5.5    │
 │ Business data │ │ Structured outputs │
 │ Content library│ │ + tool-use agent  │
 └───────────────┘ └────────────────────┘
@@ -60,7 +60,7 @@ Design choices worth calling out:
 | Framework | Next.js 16 (App Router, TypeScript) | UI + API in one deployable app |
 | Styling | Tailwind CSS v4 | Fast, consistent, no component library lock-in |
 | Database | SQLite via Prisma ORM | Zero-config for a single-workspace tool; swap the `datasource` to Postgres/MySQL for multi-user deployments without touching app code |
-| AI | `@anthropic-ai/sdk`, model `claude-opus-5` (configurable via `ANTHROPIC_MODEL`) | Structured outputs (`messages.parse` + Zod) for every generator, plus a manual tool-use loop for the Smart Assistant |
+| AI | `@anthropic-ai/sdk`, model `claude-opus-5-5` (configurable via `ANTHROPIC_MODEL`) | Structured outputs (`messages.parse` + Zod) for every generator, plus a manual tool-use loop for the Smart Assistant |
 | Validation | Zod | Both AI output schemas and API request validation |
 | Export | `docx`, `pdf-lib`, hand-rolled CSV | Real .docx/.pdf/.csv files, not just plain text |
 | Icons | `lucide-react` | Lightweight, consistent icon set |
@@ -222,9 +222,10 @@ reusable.
 
 - **`ANTHROPIC_API_KEY`** (or an `ant auth login` profile / `ANTHROPIC_AUTH_TOKEN`) — required
   for every `/api/generate/*`, `/api/quality-check`, `/api/business-profile/pillars`, and
-  `/api/assistant` call. Without it those routes return a clean `502` with the SDK's
-  authentication error rather than crashing.
-- **`ANTHROPIC_MODEL`** (optional) — override the model (defaults to `claude-opus-5`).
+  `/api/assistant` call. Without it those routes return an error explaining how to set the
+  key rather than crashing. Other AI failures (rejected key, rate limit, timeout, network)
+  are mapped to plain-language messages in `lib/ai/errors.ts`.
+- **`ANTHROPIC_MODEL`** (optional) — override the model (defaults to `claude-opus-5-5`).
 - No other external services are required. Export endpoints run entirely server-side
   (`docx`, `pdf-lib`) with no third-party API calls.
 
