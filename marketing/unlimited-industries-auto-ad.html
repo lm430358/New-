@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unlimited Industries Auto Ad</title>
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700;800&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --purple:#7b52e8; --ink:#0d0d0d; --bg:#f3f3f5; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { background:var(--bg); }
+  body { display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  .ad {
+    position:relative; width:1080px; height:1080px; overflow:hidden;
+    background:radial-gradient(120% 90% at 30% 20%, #ffffff 0%, #f4f4f6 55%, #e9e9ed 100%);
+    font-family:'League Spartan', sans-serif;
+  }
+  .waves { position:absolute; inset:0; }
+  .copy { position:absolute; left:72px; top:110px; width:600px; z-index:2; }
+  .h1 { font-weight:800; font-size:104px; line-height:.9; letter-spacing:-2px; color:var(--purple); text-transform:uppercase; }
+  .h2 { font-weight:800; font-size:92px; line-height:.95; letter-spacing:-1px; color:var(--ink); text-transform:uppercase; margin-top:6px; }
+  .kicker { margin-top:90px; font-weight:500; font-size:44px; color:var(--ink); text-transform:uppercase; letter-spacing:.5px; }
+  .deal { font-weight:800; font-size:112px; line-height:.95; color:var(--purple); letter-spacing:-2px; }
+  .sub { margin-top:36px; font-family:'Poppins', sans-serif; font-size:23px; color:var(--ink); }
+  .btn { display:inline-block; margin-top:72px; background:var(--purple); color:#fff; font-weight:700; font-size:44px;
+         padding:14px 30px 8px; border-radius:20px; }
+  .handle { margin-top:56px; font-family:'Poppins', sans-serif; font-size:23px; color:var(--ink); }
+  .car { position:absolute; right:28px; top:560px; width:520px; transform:rotate(-10deg); z-index:1; }
+  .shadow { position:absolute; right:40px; top:800px; width:500px; height:60px; border-radius:50%;
+            background:radial-gradient(closest-side, rgba(0,0,0,.35), rgba(0,0,0,0)); z-index:0; }
+  @media (max-width:1100px) { .ad { transform:scale(calc(100vw / 1080px)); } }
+</style>
+</head>
+<body>
+<div class="ad" id="ad">
+  <svg class="waves" viewBox="0 0 1080 1080" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="fold" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset=".5" stop-color="#d8d8de" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="M0 520 C 260 400, 520 330, 1080 120 L1080 220 C 560 420, 300 500, 0 640 Z" fill="url(#fold)"/>
+    <path d="M0 760 C 300 640, 640 560, 1080 420 L1080 470 C 660 610, 320 700, 0 830 Z" fill="url(#fold)" opacity=".7"/>
+  </svg>
+
+  <div class="copy">
+    <div class="h1">Unlimited<br>Industries</div>
+    <div class="h2">Auto</div>
+    <div class="kicker">Limited-time deal</div>
+    <div class="deal">15% OFF</div>
+    <div class="sub">All repairs &amp; service. Don't wait!</div>
+    <div class="btn">Book Now</div>
+    <div class="handle">@unlimitedindustriesauto</div>
+  </div>
+
+  <div class="shadow"></div>
+  <svg class="car" viewBox="0 0 760 330" aria-label="Car illustration">
+    <defs>
+      <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7bff"/><stop offset=".55" stop-color="#7b52e8"/><stop offset="1" stop-color="#4b2aa8"/>
+      </linearGradient>
+      <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e4ff"/><stop offset="1" stop-color="#5d5873"/>
+      </linearGradient>
+      <radialGradient id="rim" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#f4f4f6"/><stop offset=".7" stop-color="#b9b9c4"/><stop offset="1" stop-color="#7d7d8a"/>
+      </radialGradient>
+      <pattern id="speck" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="6" cy="8" r="2" fill="#3a1d8c" opacity=".55"/><circle cx="27" cy="20" r="1.6" fill="#c8b8ff" opacity=".7"/>
+        <circle cx="16" cy="33" r="1.3" fill="#2a8a52" opacity=".6"/><circle cx="35" cy="5" r="1.1" fill="#3a1d8c" opacity=".5"/>
+      </pattern>
+    </defs>
+    <!-- body -->
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#body)"/>
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#speck)"/>
+    <!-- green accent stripe (nod to the reference's speckled sleeve) -->
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="#2f8a55"/>
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="url(#speck)"/>
+    <!-- windows -->
+    <path d="M235 152 C 275 115, 325 90, 395 88 L 400 152 Z" fill="url(#glass)"/>
+    <path d="M418 88 C 480 88, 530 108, 568 150 L 418 152 Z" fill="url(#glass)"/>
+    <rect x="401" y="86" width="15" height="68" fill="#4b2aa8"/>
+    <!-- door lines & handles -->
+    <path d="M405 160 L 405 245 M 245 160 C 240 200, 245 230, 255 245" stroke="#3d2290" stroke-width="3" fill="none" opacity=".7"/>
+    <rect x="345" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <rect x="500" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <!-- lights -->
+    <path d="M700 172 C 720 176, 732 190, 733 205 L 705 200 Z" fill="#fff6c8"/>
+    <path d="M42 185 C 50 175, 65 170, 80 168 L 78 192 L 42 195 Z" fill="#ff5a6e"/>
+    <!-- highlight -->
+    <path d="M120 168 C 300 150, 520 148, 660 166" stroke="#ffffff" stroke-opacity=".5" stroke-width="4" fill="none"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="175" cy="258" r="62" fill="#1a1a1f"/><circle cx="175" cy="258" r="38" fill="url(#rim)"/>
+      <circle cx="175" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M175 222 L175 294 M139 258 L211 258 M150 233 L200 283 M200 233 L150 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+    <g>
+      <circle cx="600" cy="258" r="62" fill="#1a1a1f"/><circle cx="600" cy="258" r="38" fill="url(#rim)"/>
+      <circle cx="600" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M600 222 L600 294 M564 258 L636 258 M575 233 L625 283 M625 233 L575 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+  </svg>
+</div>
+</body>
+</html>
