@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Display Ads</title>
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700;800&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--purple:#7b52e8;--ink:#0d0d0d;--bg:#e4e4ea}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'League Spartan',sans-serif;padding:24px;display:flex;flex-direction:column;gap:32px;align-items:flex-start}
+h2{font:500 14px Poppins,sans-serif;color:#444;margin-bottom:8px}
+.ad{position:relative;overflow:hidden;border:1px solid #d6d6dc;
+ background:linear-gradient(160deg,transparent 38%,rgba(210,210,218,.45) 46%,transparent 54%),
+ radial-gradient(120% 90% at 30% 20%,#fff 0%,#f4f4f6 55%,#e9e9ed 100%)}
+.ad>*{position:absolute}
+.name .p{color:var(--purple)} .name .k{color:var(--ink)}
+.name{font-weight:800;text-transform:uppercase;letter-spacing:-.02em;line-height:.9}
+.kicker{font-weight:500;text-transform:uppercase;color:var(--ink)}
+.deal{font-weight:800;color:var(--purple);letter-spacing:-.02em;line-height:.95}
+.sub{font-family:Poppins,sans-serif;color:var(--ink)}
+.btn{background:var(--purple);color:#fff;font-weight:700;white-space:nowrap}
+.shadow{border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.35),rgba(0,0,0,0))}
+.car{transform:rotate(-10deg)}
+
+/* square 1200 */
+.square .name{left:80px;top:120px;font-size:112px;width:680px}
+.square .name .k{display:block;margin-top:8px;font-size:100px}
+.square .kicker{left:80px;top:520px;font-size:48px}
+.square .deal{left:80px;top:575px;font-size:124px}
+.square .sub{left:80px;top:735px;font-size:26px}
+.square .btn{left:80px;top:830px;font-size:48px;padding:16px 34px 9px;border-radius:22px}
+.square .car{right:30px;top:640px;width:580px}
+.square .shadow{right:50px;top:905px;width:550px;height:64px}
+
+/* landscape 1200x628 */
+.landscape .name{left:64px;top:64px;font-size:76px;width:600px}
+.landscape .name .k{display:block;margin-top:6px}
+.landscape .kicker{left:64px;top:290px;font-size:34px}
+.landscape .deal{left:64px;top:328px;font-size:96px}
+.landscape .sub{left:64px;top:446px;font-size:21px}
+.landscape .btn{left:64px;top:504px;font-size:36px;padding:12px 26px 6px;border-radius:16px}
+.landscape .car{right:40px;top:250px;width:520px}
+.landscape .shadow{right:60px;top:500px;width:480px;height:52px}
+
+/* 300x250 */
+.medium .name{left:16px;top:16px;font-size:24px;width:200px}
+.medium .name .k{display:block}
+.medium .kicker{left:16px;top:92px;font-size:13px}
+.medium .deal{left:16px;top:108px;font-size:42px}
+.medium .sub{display:none}
+.medium .btn{left:16px;top:200px;font-size:17px;padding:7px 14px 4px;border-radius:9px}
+.medium .car{right:8px;top:160px;width:150px}
+.medium .shadow{right:12px;top:220px;width:140px;height:16px}
+
+/* 300x600 */
+.half .name{left:22px;top:28px;font-size:44px;width:260px}
+.half .name .k{display:block;margin-top:4px}
+.half .kicker{left:22px;top:192px;font-size:20px}
+.half .deal{left:22px;top:216px;font-size:66px}
+.half .sub{left:22px;top:292px;font-size:13px}
+.half .car{left:14px;top:360px;width:270px}
+.half .shadow{left:24px;top:488px;width:260px;height:26px}
+.half .btn{left:22px;top:528px;font-size:24px;padding:9px 18px 5px;border-radius:12px}
+
+/* 728x90 */
+.leaderboard .name{left:18px;top:16px;font-size:26px;width:200px}
+.leaderboard .name .k{display:block}
+.leaderboard .kicker{left:240px;top:14px;font-size:14px}
+.leaderboard .deal{left:240px;top:30px;font-size:46px}
+.leaderboard .sub{display:none}
+.leaderboard .car{left:420px;top:4px;width:150px}
+.leaderboard .shadow{left:430px;top:66px;width:140px;height:14px}
+.leaderboard .btn{right:18px;top:24px;font-size:22px;padding:9px 16px 5px;border-radius:10px}
+
+/* 320x50 */
+.mobile .name{left:8px;top:8px;font-size:15px;width:110px}
+.mobile .name .k{display:block}
+.mobile .kicker{display:none}
+.mobile .deal{left:122px;top:14px;font-size:24px}
+.mobile .sub,.mobile .car,.mobile .shadow{display:none}
+.mobile .btn{right:8px;top:12px;font-size:14px;padding:6px 10px 3px;border-radius:7px}
+</style></head><body>
+
+<section><h2>square-1200x1200</h2>
+<div class="ad square" id="square-1200x1200" style="width:1200px;height:1200px">
+  <div class="name"><span class="p">Unlimited Industries</span> <span class="k">Auto</span></div>
+  <div class="kicker">Limited-time deal</div>
+  <div class="deal">15% OFF</div>
+  <div class="sub">All repairs &amp; service. Don't wait!</div>
+  <div class="btn">Book Now</div>
+  <div class="shadow"></div>
+    <svg class="car" viewBox="0 0 760 330" aria-label="Car illustration">
+    <defs>
+      <linearGradient id="body-square-1200x1200" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7bff"/><stop offset=".55" stop-color="#7b52e8"/><stop offset="1" stop-color="#4b2aa8"/>
+      </linearGradient>
+      <linearGradient id="glass-square-1200x1200" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e4ff"/><stop offset="1" stop-color="#5d5873"/>
+      </linearGradient>
+      <radialGradient id="rim-square-1200x1200" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#f4f4f6"/><stop offset=".7" stop-color="#b9b9c4"/><stop offset="1" stop-color="#7d7d8a"/>
+      </radialGradient>
+      <pattern id="speck-square-1200x1200" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="6" cy="8" r="2" fill="#3a1d8c" opacity=".55"/><circle cx="27" cy="20" r="1.6" fill="#c8b8ff" opacity=".7"/>
+        <circle cx="16" cy="33" r="1.3" fill="#2a8a52" opacity=".6"/><circle cx="35" cy="5" r="1.1" fill="#3a1d8c" opacity=".5"/>
+      </pattern>
+    </defs>
+    <!-- body -->
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#body-square-1200x1200)"/>
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#speck-square-1200x1200)"/>
+    <!-- green accent stripe (nod to the reference's speckled sleeve) -->
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="#2f8a55"/>
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="url(#speck-square-1200x1200)"/>
+    <!-- windows -->
+    <path d="M235 152 C 275 115, 325 90, 395 88 L 400 152 Z" fill="url(#glass-square-1200x1200)"/>
+    <path d="M418 88 C 480 88, 530 108, 568 150 L 418 152 Z" fill="url(#glass-square-1200x1200)"/>
+    <rect x="401" y="86" width="15" height="68" fill="#4b2aa8"/>
+    <!-- door lines & handles -->
+    <path d="M405 160 L 405 245 M 245 160 C 240 200, 245 230, 255 245" stroke="#3d2290" stroke-width="3" fill="none" opacity=".7"/>
+    <rect x="345" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <rect x="500" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <!-- lights -->
+    <path d="M700 172 C 720 176, 732 190, 733 205 L 705 200 Z" fill="#fff6c8"/>
+    <path d="M42 185 C 50 175, 65 170, 80 168 L 78 192 L 42 195 Z" fill="#ff5a6e"/>
+    <!-- highlight -->
+    <path d="M120 168 C 300 150, 520 148, 660 166" stroke="#ffffff" stroke-opacity=".5" stroke-width="4" fill="none"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="175" cy="258" r="62" fill="#1a1a1f"/><circle cx="175" cy="258" r="38" fill="url(#rim-square-1200x1200)"/>
+      <circle cx="175" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M175 222 L175 294 M139 258 L211 258 M150 233 L200 283 M200 233 L150 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+    <g>
+      <circle cx="600" cy="258" r="62" fill="#1a1a1f"/><circle cx="600" cy="258" r="38" fill="url(#rim-square-1200x1200)"/>
+      <circle cx="600" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M600 222 L600 294 M564 258 L636 258 M575 233 L625 283 M625 233 L575 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+  </svg>
+
+</div></section>
+
+<section><h2>landscape-1200x628</h2>
+<div class="ad landscape" id="landscape-1200x628" style="width:1200px;height:628px">
+  <div class="name"><span class="p">Unlimited Industries</span> <span class="k">Auto</span></div>
+  <div class="kicker">Limited-time deal</div>
+  <div class="deal">15% OFF</div>
+  <div class="sub">All repairs &amp; service. Don't wait!</div>
+  <div class="btn">Book Now</div>
+  <div class="shadow"></div>
+    <svg class="car" viewBox="0 0 760 330" aria-label="Car illustration">
+    <defs>
+      <linearGradient id="body-landscape-1200x628" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7bff"/><stop offset=".55" stop-color="#7b52e8"/><stop offset="1" stop-color="#4b2aa8"/>
+      </linearGradient>
+      <linearGradient id="glass-landscape-1200x628" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e4ff"/><stop offset="1" stop-color="#5d5873"/>
+      </linearGradient>
+      <radialGradient id="rim-landscape-1200x628" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#f4f4f6"/><stop offset=".7" stop-color="#b9b9c4"/><stop offset="1" stop-color="#7d7d8a"/>
+      </radialGradient>
+      <pattern id="speck-landscape-1200x628" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="6" cy="8" r="2" fill="#3a1d8c" opacity=".55"/><circle cx="27" cy="20" r="1.6" fill="#c8b8ff" opacity=".7"/>
+        <circle cx="16" cy="33" r="1.3" fill="#2a8a52" opacity=".6"/><circle cx="35" cy="5" r="1.1" fill="#3a1d8c" opacity=".5"/>
+      </pattern>
+    </defs>
+    <!-- body -->
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#body-landscape-1200x628)"/>
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#speck-landscape-1200x628)"/>
+    <!-- green accent stripe (nod to the reference's speckled sleeve) -->
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="#2f8a55"/>
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="url(#speck-landscape-1200x628)"/>
+    <!-- windows -->
+    <path d="M235 152 C 275 115, 325 90, 395 88 L 400 152 Z" fill="url(#glass-landscape-1200x628)"/>
+    <path d="M418 88 C 480 88, 530 108, 568 150 L 418 152 Z" fill="url(#glass-landscape-1200x628)"/>
+    <rect x="401" y="86" width="15" height="68" fill="#4b2aa8"/>
+    <!-- door lines & handles -->
+    <path d="M405 160 L 405 245 M 245 160 C 240 200, 245 230, 255 245" stroke="#3d2290" stroke-width="3" fill="none" opacity=".7"/>
+    <rect x="345" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <rect x="500" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <!-- lights -->
+    <path d="M700 172 C 720 176, 732 190, 733 205 L 705 200 Z" fill="#fff6c8"/>
+    <path d="M42 185 C 50 175, 65 170, 80 168 L 78 192 L 42 195 Z" fill="#ff5a6e"/>
+    <!-- highlight -->
+    <path d="M120 168 C 300 150, 520 148, 660 166" stroke="#ffffff" stroke-opacity=".5" stroke-width="4" fill="none"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="175" cy="258" r="62" fill="#1a1a1f"/><circle cx="175" cy="258" r="38" fill="url(#rim-landscape-1200x628)"/>
+      <circle cx="175" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M175 222 L175 294 M139 258 L211 258 M150 233 L200 283 M200 233 L150 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+    <g>
+      <circle cx="600" cy="258" r="62" fill="#1a1a1f"/><circle cx="600" cy="258" r="38" fill="url(#rim-landscape-1200x628)"/>
+      <circle cx="600" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M600 222 L600 294 M564 258 L636 258 M575 233 L625 283 M625 233 L575 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+  </svg>
+
+</div></section>
+
+<section><h2>medium-rectangle-300x250</h2>
+<div class="ad medium" id="medium-rectangle-300x250" style="width:300px;height:250px">
+  <div class="name"><span class="p">Unlimited Industries</span> <span class="k">Auto</span></div>
+  <div class="kicker">Limited-time deal</div>
+  <div class="deal">15% OFF</div>
+  <div class="sub">All repairs &amp; service. Don't wait!</div>
+  <div class="btn">Book Now</div>
+  <div class="shadow"></div>
+    <svg class="car" viewBox="0 0 760 330" aria-label="Car illustration">
+    <defs>
+      <linearGradient id="body-medium-rectangle-300x250" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7bff"/><stop offset=".55" stop-color="#7b52e8"/><stop offset="1" stop-color="#4b2aa8"/>
+      </linearGradient>
+      <linearGradient id="glass-medium-rectangle-300x250" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e4ff"/><stop offset="1" stop-color="#5d5873"/>
+      </linearGradient>
+      <radialGradient id="rim-medium-rectangle-300x250" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#f4f4f6"/><stop offset=".7" stop-color="#b9b9c4"/><stop offset="1" stop-color="#7d7d8a"/>
+      </radialGradient>
+      <pattern id="speck-medium-rectangle-300x250" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="6" cy="8" r="2" fill="#3a1d8c" opacity=".55"/><circle cx="27" cy="20" r="1.6" fill="#c8b8ff" opacity=".7"/>
+        <circle cx="16" cy="33" r="1.3" fill="#2a8a52" opacity=".6"/><circle cx="35" cy="5" r="1.1" fill="#3a1d8c" opacity=".5"/>
+      </pattern>
+    </defs>
+    <!-- body -->
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#body-medium-rectangle-300x250)"/>
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#speck-medium-rectangle-300x250)"/>
+    <!-- green accent stripe (nod to the reference's speckled sleeve) -->
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="#2f8a55"/>
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="url(#speck-medium-rectangle-300x250)"/>
+    <!-- windows -->
+    <path d="M235 152 C 275 115, 325 90, 395 88 L 400 152 Z" fill="url(#glass-medium-rectangle-300x250)"/>
+    <path d="M418 88 C 480 88, 530 108, 568 150 L 418 152 Z" fill="url(#glass-medium-rectangle-300x250)"/>
+    <rect x="401" y="86" width="15" height="68" fill="#4b2aa8"/>
+    <!-- door lines & handles -->
+    <path d="M405 160 L 405 245 M 245 160 C 240 200, 245 230, 255 245" stroke="#3d2290" stroke-width="3" fill="none" opacity=".7"/>
+    <rect x="345" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <rect x="500" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <!-- lights -->
+    <path d="M700 172 C 720 176, 732 190, 733 205 L 705 200 Z" fill="#fff6c8"/>
+    <path d="M42 185 C 50 175, 65 170, 80 168 L 78 192 L 42 195 Z" fill="#ff5a6e"/>
+    <!-- highlight -->
+    <path d="M120 168 C 300 150, 520 148, 660 166" stroke="#ffffff" stroke-opacity=".5" stroke-width="4" fill="none"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="175" cy="258" r="62" fill="#1a1a1f"/><circle cx="175" cy="258" r="38" fill="url(#rim-medium-rectangle-300x250)"/>
+      <circle cx="175" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M175 222 L175 294 M139 258 L211 258 M150 233 L200 283 M200 233 L150 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+    <g>
+      <circle cx="600" cy="258" r="62" fill="#1a1a1f"/><circle cx="600" cy="258" r="38" fill="url(#rim-medium-rectangle-300x250)"/>
+      <circle cx="600" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M600 222 L600 294 M564 258 L636 258 M575 233 L625 283 M625 233 L575 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+  </svg>
+
+</div></section>
+
+<section><h2>half-page-300x600</h2>
+<div class="ad half" id="half-page-300x600" style="width:300px;height:600px">
+  <div class="name"><span class="p">Unlimited Industries</span> <span class="k">Auto</span></div>
+  <div class="kicker">Limited-time deal</div>
+  <div class="deal">15% OFF</div>
+  <div class="sub">All repairs &amp; service. Don't wait!</div>
+  <div class="btn">Book Now</div>
+  <div class="shadow"></div>
+    <svg class="car" viewBox="0 0 760 330" aria-label="Car illustration">
+    <defs>
+      <linearGradient id="body-half-page-300x600" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7bff"/><stop offset=".55" stop-color="#7b52e8"/><stop offset="1" stop-color="#4b2aa8"/>
+      </linearGradient>
+      <linearGradient id="glass-half-page-300x600" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e4ff"/><stop offset="1" stop-color="#5d5873"/>
+      </linearGradient>
+      <radialGradient id="rim-half-page-300x600" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#f4f4f6"/><stop offset=".7" stop-color="#b9b9c4"/><stop offset="1" stop-color="#7d7d8a"/>
+      </radialGradient>
+      <pattern id="speck-half-page-300x600" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="6" cy="8" r="2" fill="#3a1d8c" opacity=".55"/><circle cx="27" cy="20" r="1.6" fill="#c8b8ff" opacity=".7"/>
+        <circle cx="16" cy="33" r="1.3" fill="#2a8a52" opacity=".6"/><circle cx="35" cy="5" r="1.1" fill="#3a1d8c" opacity=".5"/>
+      </pattern>
+    </defs>
+    <!-- body -->
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#body-half-page-300x600)"/>
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#speck-half-page-300x600)"/>
+    <!-- green accent stripe (nod to the reference's speckled sleeve) -->
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="#2f8a55"/>
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="url(#speck-half-page-300x600)"/>
+    <!-- windows -->
+    <path d="M235 152 C 275 115, 325 90, 395 88 L 400 152 Z" fill="url(#glass-half-page-300x600)"/>
+    <path d="M418 88 C 480 88, 530 108, 568 150 L 418 152 Z" fill="url(#glass-half-page-300x600)"/>
+    <rect x="401" y="86" width="15" height="68" fill="#4b2aa8"/>
+    <!-- door lines & handles -->
+    <path d="M405 160 L 405 245 M 245 160 C 240 200, 245 230, 255 245" stroke="#3d2290" stroke-width="3" fill="none" opacity=".7"/>
+    <rect x="345" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <rect x="500" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <!-- lights -->
+    <path d="M700 172 C 720 176, 732 190, 733 205 L 705 200 Z" fill="#fff6c8"/>
+    <path d="M42 185 C 50 175, 65 170, 80 168 L 78 192 L 42 195 Z" fill="#ff5a6e"/>
+    <!-- highlight -->
+    <path d="M120 168 C 300 150, 520 148, 660 166" stroke="#ffffff" stroke-opacity=".5" stroke-width="4" fill="none"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="175" cy="258" r="62" fill="#1a1a1f"/><circle cx="175" cy="258" r="38" fill="url(#rim-half-page-300x600)"/>
+      <circle cx="175" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M175 222 L175 294 M139 258 L211 258 M150 233 L200 283 M200 233 L150 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+    <g>
+      <circle cx="600" cy="258" r="62" fill="#1a1a1f"/><circle cx="600" cy="258" r="38" fill="url(#rim-half-page-300x600)"/>
+      <circle cx="600" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M600 222 L600 294 M564 258 L636 258 M575 233 L625 283 M625 233 L575 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+  </svg>
+
+</div></section>
+
+<section><h2>leaderboard-728x90</h2>
+<div class="ad leaderboard" id="leaderboard-728x90" style="width:728px;height:90px">
+  <div class="name"><span class="p">Unlimited Industries</span> <span class="k">Auto</span></div>
+  <div class="kicker">Limited-time deal</div>
+  <div class="deal">15% OFF</div>
+  <div class="sub">All repairs &amp; service. Don't wait!</div>
+  <div class="btn">Book Now</div>
+  <div class="shadow"></div>
+    <svg class="car" viewBox="0 0 760 330" aria-label="Car illustration">
+    <defs>
+      <linearGradient id="body-leaderboard-728x90" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7bff"/><stop offset=".55" stop-color="#7b52e8"/><stop offset="1" stop-color="#4b2aa8"/>
+      </linearGradient>
+      <linearGradient id="glass-leaderboard-728x90" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e4ff"/><stop offset="1" stop-color="#5d5873"/>
+      </linearGradient>
+      <radialGradient id="rim-leaderboard-728x90" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#f4f4f6"/><stop offset=".7" stop-color="#b9b9c4"/><stop offset="1" stop-color="#7d7d8a"/>
+      </radialGradient>
+      <pattern id="speck-leaderboard-728x90" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="6" cy="8" r="2" fill="#3a1d8c" opacity=".55"/><circle cx="27" cy="20" r="1.6" fill="#c8b8ff" opacity=".7"/>
+        <circle cx="16" cy="33" r="1.3" fill="#2a8a52" opacity=".6"/><circle cx="35" cy="5" r="1.1" fill="#3a1d8c" opacity=".5"/>
+      </pattern>
+    </defs>
+    <!-- body -->
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#body-leaderboard-728x90)"/>
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#speck-leaderboard-728x90)"/>
+    <!-- green accent stripe (nod to the reference's speckled sleeve) -->
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="#2f8a55"/>
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="url(#speck-leaderboard-728x90)"/>
+    <!-- windows -->
+    <path d="M235 152 C 275 115, 325 90, 395 88 L 400 152 Z" fill="url(#glass-leaderboard-728x90)"/>
+    <path d="M418 88 C 480 88, 530 108, 568 150 L 418 152 Z" fill="url(#glass-leaderboard-728x90)"/>
+    <rect x="401" y="86" width="15" height="68" fill="#4b2aa8"/>
+    <!-- door lines & handles -->
+    <path d="M405 160 L 405 245 M 245 160 C 240 200, 245 230, 255 245" stroke="#3d2290" stroke-width="3" fill="none" opacity=".7"/>
+    <rect x="345" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <rect x="500" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <!-- lights -->
+    <path d="M700 172 C 720 176, 732 190, 733 205 L 705 200 Z" fill="#fff6c8"/>
+    <path d="M42 185 C 50 175, 65 170, 80 168 L 78 192 L 42 195 Z" fill="#ff5a6e"/>
+    <!-- highlight -->
+    <path d="M120 168 C 300 150, 520 148, 660 166" stroke="#ffffff" stroke-opacity=".5" stroke-width="4" fill="none"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="175" cy="258" r="62" fill="#1a1a1f"/><circle cx="175" cy="258" r="38" fill="url(#rim-leaderboard-728x90)"/>
+      <circle cx="175" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M175 222 L175 294 M139 258 L211 258 M150 233 L200 283 M200 233 L150 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+    <g>
+      <circle cx="600" cy="258" r="62" fill="#1a1a1f"/><circle cx="600" cy="258" r="38" fill="url(#rim-leaderboard-728x90)"/>
+      <circle cx="600" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M600 222 L600 294 M564 258 L636 258 M575 233 L625 283 M625 233 L575 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+  </svg>
+
+</div></section>
+
+<section><h2>mobile-banner-320x50</h2>
+<div class="ad mobile" id="mobile-banner-320x50" style="width:320px;height:50px">
+  <div class="name"><span class="p">Unlimited Industries</span> <span class="k">Auto</span></div>
+  <div class="kicker">Limited-time deal</div>
+  <div class="deal">15% OFF</div>
+  <div class="sub">All repairs &amp; service. Don't wait!</div>
+  <div class="btn">Book Now</div>
+  <div class="shadow"></div>
+    <svg class="car" viewBox="0 0 760 330" aria-label="Car illustration">
+    <defs>
+      <linearGradient id="body-mobile-banner-320x50" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9b7bff"/><stop offset=".55" stop-color="#7b52e8"/><stop offset="1" stop-color="#4b2aa8"/>
+      </linearGradient>
+      <linearGradient id="glass-mobile-banner-320x50" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e4ff"/><stop offset="1" stop-color="#5d5873"/>
+      </linearGradient>
+      <radialGradient id="rim-mobile-banner-320x50" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#f4f4f6"/><stop offset=".7" stop-color="#b9b9c4"/><stop offset="1" stop-color="#7d7d8a"/>
+      </radialGradient>
+      <pattern id="speck-mobile-banner-320x50" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="6" cy="8" r="2" fill="#3a1d8c" opacity=".55"/><circle cx="27" cy="20" r="1.6" fill="#c8b8ff" opacity=".7"/>
+        <circle cx="16" cy="33" r="1.3" fill="#2a8a52" opacity=".6"/><circle cx="35" cy="5" r="1.1" fill="#3a1d8c" opacity=".5"/>
+      </pattern>
+    </defs>
+    <!-- body -->
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#body-mobile-banner-320x50)"/>
+    <path d="M40 220 C 40 185, 60 168, 110 160 L 210 150 C 255 105, 320 70, 410 68 C 480 66, 540 90, 590 145
+             L 670 158 C 715 166, 735 185, 735 215 L 735 240 C 735 252, 727 258, 715 258 L 55 258 C 45 258, 40 250, 40 240 Z"
+          fill="url(#speck-mobile-banner-320x50)"/>
+    <!-- green accent stripe (nod to the reference's speckled sleeve) -->
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="#2f8a55"/>
+    <path d="M60 200 L 720 200 L 724 222 L 52 222 Z" fill="url(#speck-mobile-banner-320x50)"/>
+    <!-- windows -->
+    <path d="M235 152 C 275 115, 325 90, 395 88 L 400 152 Z" fill="url(#glass-mobile-banner-320x50)"/>
+    <path d="M418 88 C 480 88, 530 108, 568 150 L 418 152 Z" fill="url(#glass-mobile-banner-320x50)"/>
+    <rect x="401" y="86" width="15" height="68" fill="#4b2aa8"/>
+    <!-- door lines & handles -->
+    <path d="M405 160 L 405 245 M 245 160 C 240 200, 245 230, 255 245" stroke="#3d2290" stroke-width="3" fill="none" opacity=".7"/>
+    <rect x="345" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <rect x="500" y="172" width="34" height="8" rx="4" fill="#e9e4ff"/>
+    <!-- lights -->
+    <path d="M700 172 C 720 176, 732 190, 733 205 L 705 200 Z" fill="#fff6c8"/>
+    <path d="M42 185 C 50 175, 65 170, 80 168 L 78 192 L 42 195 Z" fill="#ff5a6e"/>
+    <!-- highlight -->
+    <path d="M120 168 C 300 150, 520 148, 660 166" stroke="#ffffff" stroke-opacity=".5" stroke-width="4" fill="none"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="175" cy="258" r="62" fill="#1a1a1f"/><circle cx="175" cy="258" r="38" fill="url(#rim-mobile-banner-320x50)"/>
+      <circle cx="175" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M175 222 L175 294 M139 258 L211 258 M150 233 L200 283 M200 233 L150 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+    <g>
+      <circle cx="600" cy="258" r="62" fill="#1a1a1f"/><circle cx="600" cy="258" r="38" fill="url(#rim-mobile-banner-320x50)"/>
+      <circle cx="600" cy="258" r="10" fill="#4b2aa8"/>
+      <path d="M600 222 L600 294 M564 258 L636 258 M575 233 L625 283 M625 233 L575 283" stroke="#8a8a96" stroke-width="4"/>
+    </g>
+  </svg>
+
+</div></section>
+</body></html>
