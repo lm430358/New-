@@ -18,6 +18,7 @@ import {
   Archive,
   MessageSquare,
   Sparkles,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ const NAV = [
       { href: "/profit-calculator", label: "Profit Calculator", icon: Calculator },
       { href: "/resell-opportunities", label: "Resell Opportunities", icon: TrendingUp },
       { href: "/bulk-buying", label: "Bulk Buying", icon: Boxes },
+      { href: "/repair-estimate", label: "Repair Estimate", icon: Wrench },
     ],
   },
   {
