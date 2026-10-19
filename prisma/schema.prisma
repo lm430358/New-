@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Single business workspace (most installs have one row; schema allows more
+/// for an agency/multi-location setup later).
+model BusinessProfile {
+  id                 String   @id @default(cuid())
+  businessName       String
+  businessType       String? // e.g. independent repair shop, reseller, fleet, dealership...
+  city               String?
+  state              String?
+  industry           String?
+  isRepairShop       Boolean  @default(false)
+  isMobileMechanic   Boolean  @default(false)
+  resellsParts       Boolean  @default(false)
+  operatesFleet      Boolean  @default(false)
+  isDealership       Boolean  @default(false)
+  monthlyPartsBudget Float?
+  preferredSuppliers String? // JSON string[]
+  preferredBrands    String? // JSON string[]
+  conditionPref      String  @default("either") // new | used | either
+  sourcingPref       String  @default("either") // oem | aftermarket | either
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  purchaseOrders  PurchaseOrder[]
+  inventoryItems  InventoryItem[]
+  partSearches    PartSearchLog[]
+  conversations   Conversation[]
+}
+
+/// Singleton row holding app-wide settings (which business profile is active).
+model Settings {
+  id                      String  @id @default("singleton")
+  activeBusinessProfileId String?
+}
+
+/// A supplier the user has discovered and is tracking. This is the source of
+/// truth for anything shown as "verified" pricing/terms elsewhere in the app —
+/// the app never invents vendors, so every row here was either entered by the
+/// user, copied from the built-in reference list of well-known national
+/// suppliers (see src/lib/vendorSeed.ts), or added by the AI assistant only
+/// when citing one of those same reference entries.
+model Vendor {
+  id       String @id @default(cuid())
+  name     String
+  vendorType String // wholesale_distributor | oem_supplier | aftermarket_supplier | local_distributor | salvage_recycled | specialty | performance | fleet_supplier | heavy_duty | dealership | unknown
+  supplyKind String? // oem | aftermarket | wholesale | used | specialty | mixed
+
+  website  String?
+  phone    String?
+  email    String?
+  street   String?
+  city     String?
+  state    String?
+  zip      String?
+
+  partsCategories       String? // JSON string[]
+  shippingInfo          String?
+  minimumOrder          String?
+  wholesaleRequirements String?
+  accountRequirements   String?
+  returnPolicy          String?
+  warrantyInfo          String?
+  hoursInfo             String?
+
+  wholesaleStatus String @default("unverified") // verified | unverified
+  localVerified   Boolean @default(false)
+
+  sourceType String @default("user_added") // user_added | reference_list | ai_suggested_unverified
+  verificationDate DateTime?
+  verificationNotes String?
+
+  trustFlags String? // JSON string[] of scam/fraud warning signs noticed, if any
+
+  status       String  @default("researching") // researching | contacted | approved | purchased | do_not_use
+  favorite     Boolean @default(false)
+  internalRating Int? // 1-5, user's own rating
+  notes        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  priceChecks     PriceCheck[]
+  crossReferences CrossReference[]
+  purchaseOrders  PurchaseOrder[]
+  inventoryItems  InventoryItem[]
+  contactMessages VendorContactMessage[]
+}
+
+/// One manually-logged (or user-confirmed) price observation for a part at a
+/// vendor. Never auto-generated/fabricated — always tied to a date the price
+/// was actually checked.
+model PriceCheck {
+  id       String @id @default(cuid())
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  partDescription String
+  partNumber      String?
+  brand           String?
+  condition       String? // new | used | remanufactured
+  price           Float?
+  shippingCost    Float?
+  totalCost       Float?
+  availability    String?
+  warranty        String?
+  returnPolicy    String?
+  sourceUrl       String?
+  checkedAt       DateTime @default(now())
+  notes           String?
+
+  createdAt DateTime @default(now())
+}
+
+/// Cross-reference between an original (OEM or aftermarket) part number and
+/// an alternate/equivalent part number. `status` distinguishes a user- or
+/// vendor-confirmed match from an unverified potential match.
+model CrossReference {
+  id       String  @id @default(cuid())
+  vendorId String?
+  vendor   Vendor? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
+  originalPartNumber  String
+  originalIsOem       Boolean @default(true)
+  alternatePartNumber String
+  manufacturer        String?
+  compatibilityNotes  String?
+  source              String? // where this cross-reference came from (catalog, vendor, user, etc.)
+  status              String  @default("potential") // verified | potential
+
+  createdAt DateTime @default(now())
+}
+
+/// A logged part search (Section 2/3) — keeps history and lets the AI reuse
+/// vehicle context across the session.
+model PartSearchLog {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+
+  year   String?
+  make   String?
+  model  String?
+  trim   String?
+  engine String?
+  vin    String?
+
+  partName          String?
+  partNumber        String?
+  oemPartNumber     String?
+  aftermarketNumber String?
+  symptoms          String?
+
+  rawQuery           String?
+  identifiedCategory String?
+  aiNotes            String? // JSON structured AI response (category, compatibility caveat, suggested searches)
+  vinDecodeJson       String? // JSON of decoded VIN data, if a VIN was looked up
+
+  createdAt DateTime @default(now())
+}
+
+model PurchaseOrder {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+  vendorId          String?
+  vendor            Vendor?          @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
+  poNumber   String
+  date       DateTime @default(now())
+  status     String   @default("draft") // draft | sent | received | cancelled
+  shippingCost Float  @default(0)
+  taxRate    Float    @default(0)
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lineItems PurchaseOrderLineItem[]
+}
+
+model PurchaseOrderLineItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  partNumber  String?
+  description String
+  quantity    Float  @default(1)
+  unitPrice   Float  @default(0)
+  sortOrder   Int    @default(0)
+}
+
+model InventoryItem {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+  vendorId          String?
+  vendor            Vendor?          @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
+  partNumber      String?
+  description     String
+  brand           String?
+  quantity        Float  @default(0)
+  purchaseCost    Float?
+  sellingPrice    Float?
+  storageLocation String?
+  datePurchased   DateTime?
+  reorderLevel    Float  @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A drafted (never auto-sent) inquiry to a vendor. The user reviews/edits
+/// before actually sending it themselves.
+model VendorContactMessage {
+  id       String @id @default(cuid())
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  purpose String // wholesale_inquiry | availability | general
+  subject String?
+  body    String
+  sent    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+/// AI Command Center chat threads.
+model Conversation {
+  id                String           @id @default(cuid())
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
+
+  title     String    @default("New conversation")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role      String // user | assistant
+  content   String
+  toolCalls String? // JSON of any tool calls/results surfaced for this message
+  createdAt DateTime @default(now())
+}
