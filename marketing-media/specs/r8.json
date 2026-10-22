@@ -1,0 +1,8 @@
+{"scenes":[
+ [0,2.8,[["Scared to raise","black",104,"cream",-70],["your prices?","black",104,"gold",60]]],
+ [2.8,5.2,[["Start with NEW","black",96,"gold",-50],["customers only.","black",96,"cream",60]]],
+ [5.2,7.8,[["Booked 2+ weeks out?","bold",76,"cream",-50],["That's your sign.","bold",76,"gold",50]]],
+ [7.8,10.4,[["Existing clients:","semi",66,"muted",-50],["30 days' notice.","bold",80,"cream",50]]],
+ [10.4,12.8,[["Low prices don't win jobs.","bold",66,"cream",-40],["They signal low quality.","bold",66,"gold",50]]],
+ [12.8,15.8,[["Is your business visible?","black",70,"cream",-110],["Free visibility score","semi",60,"gold",10],["Link in bio","bold",72,"cream",140]]]
+]}

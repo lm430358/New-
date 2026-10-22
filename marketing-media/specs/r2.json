@@ -1,0 +1,9 @@
+{"scenes":[
+ [0,3.0,[["Not showing up","black",100,"cream",-80],["on Google Maps?","black",100,"gold",50]]],
+ [3.0,5.2,[["1. Profile not verified","bold",80,"cream",0]]],
+ [5.2,7.4,[["2. Vague category","bold",80,"cream",-50],["(\"Cleaning service\" ≠ \"House cleaning\")","semi",50,"muted",50]]],
+ [7.4,9.6,[["3. No service area","bold",80,"cream",-50],["or hours listed","bold",80,"cream",50]]],
+ [9.6,11.8,[["4. Few or old reviews","bold",80,"cream",0]]],
+ [11.8,14.0,[["5. No new photos","bold",80,"cream",-50],["or updates","bold",80,"cream",50]]],
+ [14.0,17.0,[["Check all 15 in 4 minutes","black",72,"cream",-110],["Free visibility score","semi",60,"gold",10],["Link in bio","bold",72,"cream",140]]]
+]}
