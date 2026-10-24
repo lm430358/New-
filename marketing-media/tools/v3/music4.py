@@ -1,8 +1,8 @@
 import numpy as np, wave, sys
 SR=44100
-def render(genre,dur,seed=1):
+def render(genre,dur,seed=1,shift=0,tempo=1.0):
     n=int(SR*dur); out=np.zeros(n); rng=np.random.default_rng(seed)
-    m=lambda k:440*2**((k-69)/12)
+    m=lambda k:440*2**((k+shift-69)/12)
     def add(sig,start,pan=None):
         i0=int(start*SR)
         if i0>=n or i0<0: return
@@ -44,6 +44,7 @@ def render(genre,dur,seed=1):
         BPM=104; ch=[[62,66,69,73],[59,62,66,69],[55,59,62,66],[57,61,64,67]]; bs=[38,35,31,33]
     elif G=="marimba":
         BPM=100; ch=[[65,69,72],[67,71,74],[64,67,71],[69,72,76]]; bs=[41,43,40,45]
+    BPM=BPM*tempo
     beat=60/BPM; bar=4*beat; b=0; st=0.0
     while st<dur:
         c=ch[b%4]; r=bs[b%4]
@@ -111,5 +112,5 @@ def render(genre,dur,seed=1):
     fade=np.minimum(1,np.minimum(np.arange(n)/(SR*.3),(n-np.arange(n))/(SR*1.5))); out*=fade
     out/=np.abs(out).max()*1.05; return out
 if __name__=="__main__":
-    o=render(sys.argv[2],float(sys.argv[3]))
+    a=sys.argv; o=render(a[2],float(a[3]),int(a[6]) if len(a)>6 else 1,int(a[4]) if len(a)>4 else 0,float(a[5]) if len(a)>5 else 1.0)
     s=(o*32767).astype(np.int16); w=wave.open(sys.argv[1],'wb'); w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(np.stack([s,s],1).tobytes()); w.close()
