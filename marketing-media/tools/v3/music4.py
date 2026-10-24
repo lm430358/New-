@@ -38,6 +38,10 @@ def render(genre,dur,seed=1):
         BPM=110; ch=[[64,67,71,74],[64,67,71,74],[69,72,76,79],[67,71,74,77]]; bs=[40,40,45,43]
     elif G=="house":
         BPM=122; ch=[[69,72,76,79],[65,69,72,76],[67,71,74,77],[64,67,71,74]]; bs=[45,41,43,40]
+    elif G=="dreamy":
+        BPM=92; ch=[[64,68,71,75],[61,64,68,71],[57,61,64,68],[59,63,66,69]]; bs=[40,37,33,35]
+    elif G=="afro":
+        BPM=104; ch=[[62,66,69,73],[59,62,66,69],[55,59,62,66],[57,61,64,67]]; bs=[38,35,31,33]
     elif G=="marimba":
         BPM=100; ch=[[65,69,72],[67,71,74],[64,67,71],[69,72,76]]; bs=[41,43,40,45]
     beat=60/BPM; bar=4*beat; b=0; st=0.0
@@ -82,6 +86,20 @@ def render(genre,dur,seed=1):
             for s in [0,1.5,2.5]:
                 for k in c: add(tone(m(k),beat*.5,.05,dec=6,harm=(1,.5,.25,.12)),st+s*beat)
             for s in [.5,1.5,2.5,3.5]: add(tone(m(r),beat*.4,.22,dec=6,harm=(1,.2)),st+s*beat)
+        elif G=="dreamy":
+            for j,k in enumerate(c): add(tone(m(k),bar*1.1,.045,dec=.6,harm=(1,.3,.1),att=8,vib=.03),st+0.05*j)
+            arp=[0,2,1,3,2,1,3,2]
+            for s in range(8): add(tone(m(c[arp[s]]+12),beat*.9,.035,dec=3,harm=(1,.15)),st+s*beat/2)
+            add(tone(m(r),bar,.16,dec=1,harm=(1,.1)),st)
+            for s in [0,2.5]: add(kick(.3,46),st+s*beat)
+            for s in [1,3]: add(noise(.3,9,.05,False),st+s*beat)
+        elif G=="afro":
+            for s in range(16): add(noise(.05,60,.04 if s%4 else .07,False),st+s*beat/4+(0.012 if s%2 else 0))
+            for s in [0,1.5,2.75]: add(kick(.45,42),st+s*beat)
+            for s in [0,.75,2,2.5,3.25]: add(tone(m(r),beat*.5,.22,dec=4,harm=(1,.35)),st+s*beat)
+            for s in [1,2.5,3.5]:
+                for k in c: add(tone(m(k+12),beat*.25,.035,dec=14,harm=(1,0,.3)),st+s*beat)
+            for s in [1,3]: add(noise(.1,30,.08,False),st+s*beat)
         elif G=="marimba":
             seq=[0,2,1,2,0,2,1,2]
             for s in range(8): add(tone(m(c[seq[s]]+12),beat*.6,.09,dec=9,harm=(1,0,.25,0,.05)),st+s*beat/2)

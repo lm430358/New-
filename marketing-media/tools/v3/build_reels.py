@@ -1,5 +1,7 @@
 import sys, os, shutil
 from reels import *
+import subprocess
+from PIL import ImageFilter
 YEL=(255,214,64); RED=(255,59,48); BLUE=(10,132,255); WHITE=(255,255,255); BLACK=(12,12,14); NAVY=(11,21,48); GOLD=(201,162,39)
 def pingpong(dirn,i):
     n=len(os.listdir(dirn)); p=i%(2*n-2) if n>1 else 0; return frame(dirn,p if p<n else 2*n-2-p)
@@ -161,5 +163,80 @@ def R_missed():
             d.rounded_rectangle([170,1220,910,1360],70,fill=(52,199,89)); d.text((W//2,1290),"Free score • link in bio",font=F("popb",54),fill=WHITE,anchor="mm")
         return im
     run("r-missed",18.0,draw,"music/house.wav")
-if __name__=="__main__":
+# ---------- F1: one-time -> monthly (silent POV steps, dreamy, centered shadow text)
+def shadow_text(im,lines,y,t,a,size=92,font="pop",tag=None):
+    lay=Image.new("RGBA",im.size,(0,0,0,0)); ld=ImageDraw.Draw(lay)
+    fo=F(font,size); yy=y; boxes=[]
+    dd=ImageDraw.Draw(im)
+    while max(tw(dd,l,fo) for l in lines)>960: size-=4; fo=F(font,size)
+    for l in lines:
+        ld.text((W//2,yy),l,font=fo,fill=(0,0,0,170),anchor="ma"); yy+=int(size*1.18)
+    lay=lay.filter(ImageFilter.GaussianBlur(10)); im.paste((0,0,0),(0,0),lay.split()[3])
+    d=ImageDraw.Draw(im); yy=y
+    if tag:
+        tf=F("popb",44); w=tw(d,tag,tf); d.rounded_rectangle([W//2-w//2-28,y-110,W//2+w//2+28,y-36],37,fill=YEL); d.text((W//2,y-73),tag,font=tf,fill=BLACK,anchor="mm")
+    for l in lines: d.text((W//2,yy),l,font=fo,fill=WHITE,anchor="ma"); yy+=int(size*1.18)
+def R_monthly():
+    for n,c,s0,du in [("stove","clips/stove.mp4",0,9),("counter","clips/counter.mp4",2,8),("card","clips/card.mp4",0,7.5),("wipe","clips/wipe.mp4",2,8)]:
+        extract(c,s0,du,"bg/"+n,"eq=brightness=-0.08")
+    S=[(0,3.5,"stove",["Turn a one-time clean","into a MONTHLY client"],"IF YOU OWN A CLEANING BUSINESS"),
+       (3.5,6.5,"counter",["Before you leave,","set this on the counter:"],None),
+       (6.5,9.5,"card",["1. A handwritten","thank-you with your name"],None),
+       (9.5,12.5,"wipe",["2. A short list of","what you cleaned today"],None),
+       (12.5,15.5,"counter",["3. Two prices:","one-time $X or","every 2 weeks $Y"],None),
+       (15.5,18.5,"wipe",["4. A QR code to your","Google review link"],None),
+       (18.5,21.5,"card",["Next day, text:",'"Want me to hold every','other Thursday for you?"'],None),
+       (21.5,24.5,"stove",["Save this for","your next clean"],"FOLLOW FOR MORE")]
+    def draw(t,i):
+        a,b,clip,L,tag=next((x for x in S if x[0]<=t<x[1]),S[-1]); k=i-int(a*FPS)
+        if clip=="counter" and a>10: k+=90
+        if clip=="wipe" and a>12: k+=90
+        if clip=="card" and a>15: k+=90
+        if clip=="stove" and a>20: k=k
+        im=frame("bg/"+clip,k)
+        shadow_text(im,L,720,t,a,96 if len(L)<3 else 84,tag=tag)
+        if 6.5<=t<18.5:
+            n=int((t-6.5)//3)+1; d=ImageDraw.Draw(im)
+            for j in range(4): d.rounded_rectangle([W//2-118+j*62,1320,W//2-118+j*62+50,1332],6,fill=YEL if j<n else (255,255,255))
+        return im
+    run("f-monthly",24.5,draw,"music/dreamy.wav")
+# ---------- F2: claim these free listings (VO, checklist builder cards over map footage, afro)
+def R_listings():
+    extract("clips/mapphone.mp4",0,11,"bg/map","eq=brightness=-0.32:saturation=0.8")
+    items=[(4.75,"Google Business Profile","Show up in Google Search & Maps"),(6.54,"Apple Business Connect","Show up on Apple Maps"),
+           (9.79,"Bing Places","Can import your Google profile"),(13.48,"Nextdoor Business Page","Neighbors recommend local pros"),(16.66,"Facebook Business Page","Free page + reviews")]
+    def draw(t,i):
+        im=pingpong("bg/map",i); d=ImageDraw.Draw(im)
+        d.text((W//2,250),"CLAIM THESE",font=F("anton",150),fill=WHITE,anchor="mm")
+        d.rounded_rectangle([W//2-330,345,W//2+330,415],35,fill=YEL); d.text((W//2,380),"FREE LISTINGS • CLEANING BUSINESSES",font=F("popb",34),fill=BLACK,anchor="mm")
+        if t<4.75:
+            p=ease((t+0.5)/0.25)
+            d.text((W//2,700),"If you own a",font=F("pop",80),fill=WHITE,anchor="mm",stroke_width=6,stroke_fill=BLACK)
+            d.text((W//2,800),"cleaning business",font=F("pop",80),fill=WHITE,anchor="mm",stroke_width=6,stroke_fill=BLACK)
+            d.text((W//2,960),"5 FREE LISTINGS",font=F("anton",int(150*(1.2-0.2*p))),fill=YEL,anchor="mm",stroke_width=6,stroke_fill=BLACK)
+            d.text((W//2,1090),"= more local calls",font=F("pop",72),fill=WHITE,anchor="mm",stroke_width=6,stroke_fill=BLACK)
+        y=480
+        for k,(ts,name,sub) in enumerate(items):
+            p=ease((t-ts+0.15)/0.3)
+            if p<=0: break
+            x=90+int((1-p)*400)
+            card=Image.new("RGBA",(900,150),(0,0,0,0)); cd=ImageDraw.Draw(card)
+            cd.rounded_rectangle([0,0,899,149],34,fill=(255,255,255,int(255*p)))
+            cd.ellipse([30,35,110,115],fill=(46,160,67)); cd.line([50,77,66,94],fill=WHITE,width=9); cd.line([66,94,92,58],fill=WHITE,width=9)
+            cd.text((140,28),name,font=F("popb",48),fill=BLACK); cd.text((140,90),sub,font=F("popm",34),fill=(90,90,100))
+            im.paste(card,(x,y),card); y+=170
+        if t>=18.4:
+            p=ease((t-18.4)/0.25); f=F("anton",int(170*(1.4-0.4*p)))
+            d.text((W//2,1420),"ALL FREE.",font=f,fill=YEL,anchor="mm",stroke_width=6,stroke_fill=BLACK)
+        if t>=19.3:
+            d.text((W//2,1560),"Save this • Follow for part 2",font=F("popb",50),fill=WHITE,anchor="mm",stroke_width=4,stroke_fill=BLACK)
+        return im
+    fr="out/f-listings.frames"; shutil.rmtree(fr,ignore_errors=True); os.makedirs(fr); dur=22.0
+    for i in range(int(dur*FPS)): draw(i/FPS,i).save(f"{fr}/{i:05d}.jpg",quality=92)
+    subprocess.run(["ffmpeg","-y","-loglevel","error","-framerate",str(FPS),"-i",f"{fr}/%05d.jpg","-i","vo_list.mp3","-i","music/afro.wav",
+     "-filter_complex","[1:a]apad[v];[2:a]volume=0.18[m];[v][m]amix=inputs=2:duration=longest:normalize=0,atrim=0:22,afade=t=out:st=21:d=1,loudnorm=I=-15:TP=-1.5[a]",
+     "-map","0:v","-map","[a]","-c:v","libx264","-pix_fmt","yuv420p","-profile:v","high","-crf","19","-c:a","aac","-b:a","192k","-ar","44100","-movflags","+faststart","-t",str(dur),"out/f-listings.mp4"],check=True)
+    shutil.rmtree(fr)
+
+if __name__=="__main__" and len(sys.argv)>1 and "R_"+sys.argv[1] in globals():
     os.makedirs("out",exist_ok=True); globals()["R_"+sys.argv[1]]()
