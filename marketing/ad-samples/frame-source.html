@@ -16,6 +16,10 @@
   .small{font-size:26px;font-weight:700;color:#c9bfff;margin-top:14px;letter-spacing:0}
   .cta{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);background:#ffd23f;color:#1a1048;
        font-weight:900;font-size:30px;padding:18px 34px;border-radius:999px;box-shadow:0 8px 0 #c99a00,0 18px 40px rgba(0,0,0,.5);z-index:5;white-space:nowrap}
+  .brand{position:absolute;top:44px;left:0;right:0;text-align:center;z-index:6;font-weight:900;font-size:22px;letter-spacing:3px;color:#fff;text-transform:uppercase}
+  .brand b{color:#ffd23f}
+  .lockup{position:absolute;left:0;right:0;bottom:178px;text-align:center;z-index:6;font-weight:900;font-size:44px;color:#fff;letter-spacing:-1px;text-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .lockup b{color:#ffd23f}
   .burst{position:absolute;z-index:4;color:#ffd23f;font-weight:900;font-size:40px}
 </style>
 <script type="importmap">
@@ -24,6 +28,7 @@
 </head>
 <body>
 <div id="bg"></div>
+<div class="brand">Booked <b>&amp;</b> Paid</div>
 <div class="cap" id="cap"></div>
 <script type="module">
 import * as THREE from 'three';
@@ -274,8 +279,10 @@ const scenes = {
 
   // 5. "Your exit starts today." → rocket launch + CTA
   5() {
-    caption(['Your exit', 'starts *today.*'], 'Grab the starter kit ↓');
+    caption(['Your exit', 'starts *today.*'], 'Grab the free starter kit ↓');
     cta('Link in bio →');
+    const lk = document.createElement('div'); lk.className = 'lockup'; lk.innerHTML = 'Booked <b>&amp;</b> Paid'; document.body.appendChild(lk);
+    document.querySelector('.brand').style.display = 'none';
     const r = new THREE.Group();
     const body = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.7, 2.4, 48), white); r.add(body);
     const nose = new THREE.Mesh(new THREE.ConeGeometry(0.62, 1.1, 48), red); nose.position.y = 1.75; r.add(nose);
@@ -292,7 +299,7 @@ const scenes = {
     flame.rotation.x = Math.PI; flame.position.y = -1.95; r.add(flame);
     const core = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.9, 32), new THREE.MeshBasicMaterial({ color: 0xfff1b0 }));
     core.rotation.x = Math.PI; core.position.y = -1.7; r.add(core);
-    r.position.set(0.2, -2.0, 0); r.scale.setScalar(0.9);
+    r.position.set(0.2, -1.7, 0); r.scale.setScalar(0.8);
     r.rotation.set(0.1, 0.4, -0.35);
     add(r);
     // smoke puffs

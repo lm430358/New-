@@ -1,4 +1,4 @@
-# Digital Product Launch Plan
+# Booked & Paid — Digital Product Launch Plan
 
 Two parts: **Kelsey** owns the marketing plan, and **Marcus** owns the ad creative.
 Budget: **$50 ad spend**.
@@ -18,11 +18,11 @@ follow side-hustle, online business and "quit your job" creators.
 ### Offer structure
 | Tier | Example | Price | Job |
 |---|---|---|---|
-| Free lead magnet | "Starter Kit" checklist / mini-guide | $0 | Collects emails from ad traffic |
+| Free lead magnet | "Booked & Paid Starter Kit" checklist / mini-guide | $0 | Collects emails from ad traffic |
 | Entry product | Template or e-book | $9–$27 | First purchase, low risk |
 | Core product | Course or bundle | $47–$97 | Main profit |
 
-The ad sends people to the **free Starter Kit** first. Cold traffic rarely buys on the
+The ad sends people to the **free Booked & Paid Starter Kit** first. Cold traffic rarely buys on the
 first click, but it will give an email. Then the email sequence sells the paid products.
 
 ### $50 budget split (7 days)
@@ -77,6 +77,9 @@ Each caption has a matching 3D object, so the words and the visuals tell the sam
 | 3 | 6–9s | Digital products sell while you **sleep.** | Laptop at night with a moon, sale notifications and coins | "New sale" cards pop in one by one, and the graph line draws upward |
 | 4 | 9–12s | Make it **once.** Sell it forever. | E-book / Template / Course boxes over an infinity loop | Boxes pop in, and ghost copies multiply behind them |
 | 5 | 12–15s | Your exit starts **today.** | Rocket launching from smoke + "Link in bio" button | Rocket blasts off and the CTA button bounces in |
+
+**Branding:** a small "BOOKED & PAID" wordmark sits at the top of scenes 1–4. Scene 5 ends on a large
+"Booked & Paid" lockup above the "Link in bio" button.
 
 **Caption style:** Each word pops in with a quick scale-up bounce. The key word sits on a
 yellow highlight pill. White Inter Display Black text on a deep purple background.
