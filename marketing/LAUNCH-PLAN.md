@@ -76,19 +76,38 @@ Each caption has a matching 3D object, so the words and the visuals tell the sam
 | 2 | 3–6s | You trade **hours** for a paycheck. | Ringing alarm clock + one lonely coin | Clock shakes and rings, and one coin drops |
 | 3 | 6–9s | Digital products sell while you **sleep.** | Laptop at night with a moon, sale notifications and coins | "New sale" cards pop in one by one, and the graph line draws upward |
 | 4 | 9–12s | Make it **once.** Sell it forever. | E-book / Template / Course boxes over an infinity loop | Boxes pop in, and ghost copies multiply behind them |
-| 5 | 12–15s | Your exit starts **today.** | Rocket launching from smoke + "Link in bio" button | Rocket blasts off and the CTA button bounces in |
+| 5 | 12–15s | Your exit starts **today.** | Rocket launching from smoke + "Booked & Paid" + "Get the free Starter Kit" | Rocket blasts off and the button bounces in |
 
-**Branding:** a small "BOOKED & PAID" wordmark sits at the top of scenes 1–4. Scene 5 ends on a large
-"Booked & Paid" lockup above the "Link in bio" button.
+**Branding:** Reels already shows the page name (Booked & Paid) at the top of a paid ad, so scenes 1–4 carry
+no wordmark. Scene 5 ends on a large "Booked & Paid" lockup above the button.
+For the free organic posts, change the button text to "Link in bio".
 
 **Caption style:** Each word pops in with a quick scale-up bounce. The key word sits on a
 yellow highlight pill. White Inter Display Black text on a deep purple background.
 
-**Hook variation B (for the A/B test):** swap scene 1's caption to
-"Still asking permission to take a day off?" (keep the same visual).
+**Hook variation B (for the A/B test):** "Stop waiting on payday. Get **booked.** Get **paid.**" (see the attention check below).
 
 ### Sample frames
 See `ad-samples/frame1.png` … `frame5.png` (1080×1920) and `ad-samples/contact.png` for
 all five side by side. They are rendered from real 3D scenes (Three.js) in
 `ad-samples/frame-source.html`. After approval, the same scenes get animated and exported
 as the MP4.
+
+### Attention check (Kelsey)
+Checked against what makes a Reel stop the scroll. Fixed items are marked.
+
+| Check | Result |
+|---|---|
+| Hook in the first second | Pass. A short relatable line plus motion. The bars must already be moving at frame 0, with no slow build |
+| Works with sound off | Pass. Every idea is in the captions |
+| Readable on a phone | Pass. Heavy white text with a yellow key word on dark purple, at 3–6 words per scene |
+| Visuals match the words | Pass. Every caption has its own object |
+| Pacing | Pass. A new scene every 3 seconds |
+| Reels safe zones (top 14% and bottom 35% are covered by app UI) | **Fixed.** The top wordmark and the bottom CTA were sitting under the UI. All captions, objects and the CTA now sit inside the visible area |
+| CTA works for a paid ad | **Fixed.** "Link in bio" doesn't work on a paid ad (the ad has its own button), so it now reads "Get the free Starter Kit ↓" |
+| Message matches the brand | **Open.** "Booked & Paid" suggests getting clients booked and paid, but the ad talks about leaving a job. The A/B test should try a brand-led hook |
+
+**Hook B (brand-led):** "Stop waiting on payday. Get **booked.** Get **paid.**"
+
+The real proof is the 3-day test. Keep the hook that gets a **25%+ hook rate**
+(3-second views ÷ impressions). If both are under 15% by day 3, change the first scene, not the budget.

@@ -6,7 +6,7 @@
   html,body{margin:0;width:540px;height:960px;overflow:hidden;background:#0b0820;font-family:"Inter Display","Inter",sans-serif}
   #bg{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 70%,#3a1d8f 0%,#1a1048 45%,#0b0820 100%)}
   canvas{position:absolute;inset:0}
-  .cap{position:absolute;left:0;right:0;top:120px;text-align:center;padding:0 34px;z-index:5}
+  .cap{position:absolute;left:0;right:0;top:150px;text-align:center;padding:0 34px;z-index:5}
   .line{display:block;font-weight:900;font-size:50px;line-height:1.08;color:#fff;letter-spacing:-1px;
         text-shadow:0 4px 0 rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.45)}
   .w{display:inline-block;margin:0 5px;transform-origin:50% 80%}
@@ -14,11 +14,11 @@
   .hl{background:#ffd23f;color:#1a1048;padding:0 12px;border-radius:14px;text-shadow:none;
       box-shadow:0 6px 0 #c99a00,0 14px 30px rgba(0,0,0,.4)}
   .small{font-size:26px;font-weight:700;color:#c9bfff;margin-top:14px;letter-spacing:0}
-  .cta{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);background:#ffd23f;color:#1a1048;
-       font-weight:900;font-size:30px;padding:18px 34px;border-radius:999px;box-shadow:0 8px 0 #c99a00,0 18px 40px rgba(0,0,0,.5);z-index:5;white-space:nowrap}
+  .cta{position:absolute;left:50%;bottom:350px;transform:translateX(-50%);background:#ffd23f;color:#1a1048;
+       font-weight:900;font-size:26px;padding:16px 28px;border-radius:999px;box-shadow:0 8px 0 #c99a00,0 18px 40px rgba(0,0,0,.5);z-index:5;white-space:nowrap}
   .brand{position:absolute;top:44px;left:0;right:0;text-align:center;z-index:6;font-weight:900;font-size:22px;letter-spacing:3px;color:#fff;text-transform:uppercase}
   .brand b{color:#ffd23f}
-  .lockup{position:absolute;left:0;right:0;bottom:178px;text-align:center;z-index:6;font-weight:900;font-size:44px;color:#fff;letter-spacing:-1px;text-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .lockup{position:absolute;left:0;right:0;bottom:418px;text-align:center;z-index:6;font-weight:900;font-size:44px;color:#fff;letter-spacing:-1px;text-shadow:0 6px 24px rgba(0,0,0,.5)}
   .lockup b{color:#ffd23f}
   .burst{position:absolute;z-index:4;color:#ffd23f;font-weight:900;font-size:40px}
 </style>
@@ -28,7 +28,6 @@
 </head>
 <body>
 <div id="bg"></div>
-<div class="brand">Booked <b>&amp;</b> Paid</div>
 <div class="cap" id="cap"></div>
 <script type="module">
 import * as THREE from 'three';
@@ -279,10 +278,9 @@ const scenes = {
 
   // 5. "Your exit starts today." → rocket launch + CTA
   5() {
-    caption(['Your exit', 'starts *today.*'], 'Grab the free starter kit ↓');
-    cta('Link in bio →');
+    caption(['Your exit', 'starts *today.*']);
+    cta('Get the free Starter Kit ↓');
     const lk = document.createElement('div'); lk.className = 'lockup'; lk.innerHTML = 'Booked <b>&amp;</b> Paid'; document.body.appendChild(lk);
-    document.querySelector('.brand').style.display = 'none';
     const r = new THREE.Group();
     const body = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.7, 2.4, 48), white); r.add(body);
     const nose = new THREE.Mesh(new THREE.ConeGeometry(0.62, 1.1, 48), red); nose.position.y = 1.75; r.add(nose);
@@ -324,6 +322,9 @@ function graphTex() {
 
 await document.fonts.load('900 50px "Inter Display"');
 scenes[scene_id]();
+// Keep 3D objects inside the Reels safe zone (14% top / 35% bottom are covered by app UI)
+const fit = { 5: [0.55, -85] }[scene_id] || [0.8, 20];
+renderer.domElement.style.transform = `translateY(${fit[1]}px) scale(${fit[0]})`;
 renderer.render(scene, camera);
 window.__done = true;
 </script>
