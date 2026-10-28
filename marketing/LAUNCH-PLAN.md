@@ -110,6 +110,19 @@ in with a bounce. This matches the site's "Get booked. Get paid. Or go solo." he
 | Reels safe zones (top 14% and bottom 35% are covered by app UI) | Pass. All captions, objects and the button sit in the visible middle |
 | CTA works for a paid ad | Pass. "Get the plan ↓" points at Meta's own button. Organic posts use "Link in bio" |
 
+### Finished videos
+| File | Use |
+|---|---|
+| `ads/booked-paid-go-solo-A.mp4` | Hook A: "Still building **someone else's** business?" |
+| `ads/booked-paid-go-solo-B.mp4` | Hook B: "Good at the work. **Tired** of the chase." |
+
+Both are 1080×1920, 30 fps, 15 s, H.264 + AAC, ready to upload to Meta Ads Manager, TikTok and Shorts.
+**Sound:** a 120 BPM beat (scene cuts land on the bar) plus a sound for every pop-in: word pops,
+coin clinks, checklist dings, calendar ticks, cash-register hits on payments, and a whoosh with a
+flash on every cut. The beat drops out for half a second before the B&P coin lands. There's no
+voiceover, so the captions carry the message for the many people who scroll with sound off.
+The animation source is `ad-samples/video-source.html` and the soundtrack generator is `ad-samples/audio.py`.
+
 ### Sample frames
 `ad-samples/frame1.png` … `frame5.png` (1080×1920) and `ad-samples/contact.png` (all five).
 They are rendered from real 3D scenes (Three.js) in `ad-samples/frame-source.html`. After approval,
