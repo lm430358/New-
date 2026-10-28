@@ -54,10 +54,15 @@ If clicks are good but nobody buys, the problem is the product page, not the ad.
 is low, change the first scene, not the budget.
 
 ### Before turning the ads on
-1. **Turn off Stripe test mode.** The site has a `PaymentTestModeBanner`, so make sure live
-   payments are on, or ad clicks can't buy.
-2. **Add the Meta pixel** to the site so Meta can optimise for purchases and you can see which ad sold.
-3. **Give the Go Solo Plan its own page** that the ad can link to directly, not just the homepage.
+1. ✅ **Live payments.** Checked 2026-10-28. The published site (bookedandpaidblueprint.com) uses a
+   live Stripe key, and `/checkout/go-solo` shows a real Stripe checkout. The test-mode banner only
+   appears in the Lovable preview.
+2. ⬜ **Meta pixel.** Not installed yet. Create a pixel in Meta Events Manager and send the Pixel ID
+   so it can be added to the site with a Purchase event on the order-confirmation page.
+3. ✅ **Direct product page.** The Go Solo Plan already has its own page. Ad links:
+   - Hook A: `https://bookedandpaidblueprint.com/products/go-solo?utm_source=meta&utm_medium=paid&utm_campaign=go-solo&utm_content=hook-a`
+   - Hook B: `https://bookedandpaidblueprint.com/products/go-solo?utm_source=meta&utm_medium=paid&utm_campaign=go-solo&utm_content=hook-b`
+   - Organic (link in bio): `https://bookedandpaidblueprint.com/products/go-solo`
 
 ### After the sale (email, since buyers get the PDF by email)
 1. **Day 0:** Download link + "start with the Readiness checklist."
