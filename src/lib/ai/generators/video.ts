@@ -11,7 +11,11 @@ export async function generateVideoScript(
     ctx,
     `Write a ${params.lengthLabel} short-form video script${
       params.platform ? ` for ${params.platform}` : ""
-    } about the topic below. Structure it as: HOOK -> PROBLEM -> VALUE/STORY/SOLUTION -> PROOF OR EXAMPLE -> CTA, broken into clearly labeled sections. For each section give the exact voiceover/dialogue line(s), on-screen text, a concrete b-roll/visual suggestion (stock footage, screen recording, demonstration, photo — be specific), and a camera direction (framing, movement). Pace the script realistically for the target length — do not write a script that would take far longer or shorter to read aloud than ${params.lengthLabel}.`
+    } about the topic below. Structure it as: HOOK -> PROBLEM -> VALUE/STORY/SOLUTION -> PROOF OR EXAMPLE -> CTA, broken into clearly labeled sections. For each section give the exact voiceover/dialogue line(s), on-screen text, a concrete b-roll/visual suggestion (stock footage, screen recording, demonstration, photo — be specific), and a camera direction (framing, movement). Pace the script realistically for the target length — do not write a script that would take far longer or shorter to read aloud than ${params.lengthLabel}.${
+      ctx.presenterName
+        ? ` ${ctx.presenterName} is the on-camera presenter: every voiceover/dialogue line is spoken by ${ctx.presenterName} to camera, and camera directions should frame ${ctx.presenterName} in the signature look described above, with b-roll and on-screen graphics layered around them rather than replacing them.`
+        : ""
+    }`
   );
   const result = await generateStructured({
     system,

@@ -66,7 +66,29 @@ export function buildBusinessContextBlock(ctx: BusinessContext): string {
     );
   }
   lines.push(`\nBRAND VOICE: ${ctx.brandVoice}\n${brandVoiceInstruction(ctx)}`);
+  const presenter = presenterInstruction(ctx);
+  if (presenter) lines.push(`\n${presenter}`);
   return lines.join("\n");
+}
+
+/**
+ * The brand's on-camera presenter. When set, every video script, reel, and
+ * short-form concept is written for this person to deliver on camera.
+ */
+export function presenterInstruction(ctx: BusinessContext): string | null {
+  if (!ctx.presenterName) return null;
+  const name = ctx.presenterName;
+  const parts = [
+    `ON-CAMERA PRESENTER: ${name}`,
+    `${name} is the face of the brand. Write every video script, reel, short, and talking-head concept for ${name} to deliver on camera, in the first person, in ${name}'s own voice. Spoken lines must sound natural said out loud by ${name} — short, sayable sentences, no tongue-twisters, nothing that sounds read off a page.`,
+  ];
+  if (ctx.presenterStyle) parts.push(`How ${name} talks: ${ctx.presenterStyle}`);
+  if (ctx.presenterLook)
+    parts.push(
+      `${name}'s signature look and set (use this for camera directions, visuals, and on-screen text styling unless the topic clearly needs something else): ${ctx.presenterLook}`
+    );
+  if (ctx.presenterAvoid) parts.push(`${name} would never: ${ctx.presenterAvoid}`);
+  return parts.join("\n");
 }
 
 export const CONTENT_QUALITY_RULES = `

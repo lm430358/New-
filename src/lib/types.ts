@@ -116,6 +116,10 @@ export interface BusinessContext {
   competitors: string[];
   preferredPlatforms: string[];
   contentPillars: ContentPillar[];
+  presenterName?: string;
+  presenterStyle?: string;
+  presenterLook?: string;
+  presenterAvoid?: string;
 }
 
 export interface ContentPillar {
@@ -159,5 +163,9 @@ export function toBusinessContext(profile: BusinessProfile | null): BusinessCont
     competitors: safeParseJsonArray(profile.competitors),
     preferredPlatforms: safeParseJsonArray(profile.preferredPlatforms),
     contentPillars: safeParseJson(profile.contentPillars, [] as ContentPillar[]),
+    presenterName: profile.presenterName ?? undefined,
+    presenterStyle: profile.presenterStyle ?? undefined,
+    presenterLook: profile.presenterLook ?? undefined,
+    presenterAvoid: profile.presenterAvoid ?? undefined,
   };
 }

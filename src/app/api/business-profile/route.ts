@@ -35,6 +35,10 @@ export async function POST(request: Request) {
     goals: JSON.stringify(data.goals ?? []),
     competitors: JSON.stringify(data.competitors ?? []),
     preferredPlatforms: JSON.stringify(data.preferredPlatforms ?? []),
+    presenterName: data.presenterName || null,
+    presenterStyle: data.presenterStyle || null,
+    presenterLook: data.presenterLook || null,
+    presenterAvoid: data.presenterAvoid || null,
   };
 
   const profile = data.id

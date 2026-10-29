@@ -20,5 +20,9 @@ export const businessProfileInputSchema = z.object({
   goals: z.array(z.string()).optional().default([]),
   competitors: z.array(z.string()).optional().default([]),
   preferredPlatforms: z.array(z.string()).optional().default([]),
+  presenterName: z.string().optional(),
+  presenterStyle: z.string().optional(),
+  presenterLook: z.string().optional(),
+  presenterAvoid: z.string().optional(),
 });
 export type BusinessProfileInput = z.infer<typeof businessProfileInputSchema>;

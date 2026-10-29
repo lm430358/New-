@@ -28,6 +28,10 @@ interface ProfileData {
   goals: string[];
   competitors: string[];
   preferredPlatforms: string[];
+  presenterName: string;
+  presenterStyle: string;
+  presenterLook: string;
+  presenterAvoid: string;
 }
 
 const EMPTY: ProfileData = {
@@ -49,6 +53,21 @@ const EMPTY: ProfileData = {
   goals: [],
   competitors: [],
   preferredPlatforms: [],
+  presenterName: "",
+  presenterStyle: "",
+  presenterLook: "",
+  presenterAvoid: "",
+};
+
+/** Keora's on-camera style for Booked & Paid Blueprint, taken from her reels. */
+const KEORA_PRESET = {
+  presenterName: "Keora",
+  presenterStyle:
+    "Confident, warm, and direct — talks to service providers like a mentor who's already done it. Short punchy lines, one idea per sentence, a mindset shift up front (e.g. \"Your skill deserves more than likes\") and then one clear next step. Ends with a specific reason to click the link in bio, never a vague one.",
+  presenterLook:
+    "Polished, premium, editorial. Elegant off-white/cream pantsuit against a dark navy or black studio backdrop, medium shot. Sleek 3D business icons float around her — booked calendars, ringing phones, invoices, chat bubbles, website windows. On-screen text in a clean serif with gold accent words. Subtle modern electronic beat. Brand line: \"BOOKED & PAID\".",
+  presenterAvoid:
+    "Hype, yelling, or bro-marketing; fake urgency or income guarantees; stock-footage-only videos where she isn't on screen; vague CTAs like \"link in bio\" with no reason to tap; talking down to people who are busy but not booked.",
 };
 
 export function BusinessProfileForm() {
@@ -103,6 +122,10 @@ export function BusinessProfileForm() {
             goals: safeArr(p.goals),
             competitors: safeArr(p.competitors),
             preferredPlatforms: safeArr(p.preferredPlatforms),
+            presenterName: p.presenterName ?? "",
+            presenterStyle: p.presenterStyle ?? "",
+            presenterLook: p.presenterLook ?? "",
+            presenterAvoid: p.presenterAvoid ?? "",
           });
           setCompetitorsText(safeArr(p.competitors).join(", "));
           const rows = Object.entries(social) as [string, string][];
@@ -301,6 +324,50 @@ export function BusinessProfileForm() {
               </FieldGroup>
             </div>
           )}
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex items-center justify-between flex-row">
+          <div>
+            <CardTitle>On-Camera Presenter</CardTitle>
+            <p className="text-sm text-slate-500 mt-1">
+              The face of your brand. Video scripts and reels are written for them to say on camera.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setData((d) => ({ ...d, ...KEORA_PRESET }));
+              setSaved(false);
+            }}
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Use Keora preset
+          </Button>
+        </CardHeader>
+        <CardBody className="grid md:grid-cols-2 gap-x-6">
+          <FieldGroup className="md:col-span-2">
+            <Label hint="leave blank for faceless content">Presenter name</Label>
+            <Input
+              value={data.presenterName}
+              onChange={(e) => update("presenterName", e.target.value)}
+              placeholder="e.g. Keora"
+            />
+          </FieldGroup>
+          <FieldGroup className="md:col-span-2">
+            <Label>How they talk on camera</Label>
+            <Textarea value={data.presenterStyle} onChange={(e) => update("presenterStyle", e.target.value)} />
+          </FieldGroup>
+          <FieldGroup className="md:col-span-2">
+            <Label>Signature look & set</Label>
+            <Textarea value={data.presenterLook} onChange={(e) => update("presenterLook", e.target.value)} />
+          </FieldGroup>
+          <FieldGroup className="md:col-span-2">
+            <Label>Never says or does</Label>
+            <Textarea value={data.presenterAvoid} onChange={(e) => update("presenterAvoid", e.target.value)} />
+          </FieldGroup>
         </CardBody>
       </Card>
 

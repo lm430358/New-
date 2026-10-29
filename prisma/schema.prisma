@@ -30,6 +30,10 @@ model BusinessProfile {
   competitors        String? // JSON string[]
   preferredPlatforms String? // JSON string[]
   contentPillars     String? // JSON ContentPillar[] cached from last generation
+  presenterName      String? // the on-camera face of the brand; video content is written for them to deliver
+  presenterStyle     String? // how the presenter talks on camera
+  presenterLook      String? // the presenter's signature visual style / set
+  presenterAvoid     String? // things the presenter would never say or do
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
