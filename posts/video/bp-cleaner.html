@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#0b0b0b;font-family:Inter,sans-serif;color:#fff}
+#stage{position:absolute;inset:0}
+.scene{position:absolute;inset:0;opacity:0;overflow:hidden}
+.A{font-family:Anton,Impact,sans-serif;line-height:.92}
+.y{color:#FFD400}
+.hook{display:flex;flex-direction:column;justify-content:center;padding:0 90px}
+.hook .big{font-size:230px}.hook .vs{font-size:90px;color:#666;margin:20px 0 10px}
+.hook .line{margin-top:70px;font-weight:800;font-size:56px;border-left:12px solid #FFD400;padding-left:30px}
+.split{display:flex;flex-direction:column}
+.half{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 90px}
+.half.l{background:#0b0b0b}.half.r{background:#FFD400;color:#0b0b0b}
+.lab{font-family:Anton;font-size:64px;letter-spacing:2px;opacity:.6;margin-bottom:24px}
+.item{display:flex;align-items:center;gap:40px;font-weight:900;font-size:96px;line-height:1.02}
+.mark{flex:none;width:130px;height:130px;border-radius:50%;display:grid;place-items:center;font-size:76px;font-weight:900}
+.l .mark{background:#2a2a2a;color:#ff4d4d}.r .mark{background:#0b0b0b;color:#FFD400}
+.l .item{color:#d9d9d9}
+.bar{height:14px;background:#fff}
+.fix{display:flex;flex-direction:column;justify-content:center;padding:0 90px;background:#FFD400;color:#0b0b0b}
+.fix h2{font-family:Anton;font-size:170px;line-height:.95;margin-bottom:70px}
+.fix li{list-style:none;font-weight:900;font-size:66px;padding:38px 0;border-top:6px solid #0b0b0b;display:flex;gap:30px}
+.fix li:last-child{border-bottom:6px solid #0b0b0b}
+.fix li b{font-family:Anton;font-weight:400}
+.cta{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 80px}
+.cta .k{font-family:Anton;font-size:120px}
+.cta .box{margin:50px 0;background:#FFD400;color:#0b0b0b;font-family:Anton;font-size:190px;padding:20px 60px;transform:rotate(-2deg)}
+.cta .s{font-weight:800;font-size:58px;line-height:1.25}
+.brand{position:absolute;top:110px;left:0;right:0;text-align:center;font-weight:900;letter-spacing:8px;font-size:30px;color:#FFD400;mix-blend-mode:difference;z-index:5}
+#progress{position:absolute;left:0;right:0;top:0;height:12px;background:#FFD400;transform-origin:left;z-index:6;mix-blend-mode:difference}
+</style></head><body>
+<div id="stage"></div><div class="brand">BOOKED &amp; PAID</div><div id="progress"></div>
+<script src="engine.js"></script>
+<script>
+const pair=(bad,good)=>({dur:2.9,cls:'split',html:`
+ <div class="half l"><div class="lab" data-in="left">THE $40 CLEANER</div><div class="item" data-in="left"><span class="mark">✕</span>${bad}</div></div>
+ <div class="half r"><div class="lab" data-in="right" data-at="0.7">THE $120 CLEANER</div><div class="item" data-in="right" data-at="0.85"><span class="mark">✓</span>${good}</div></div>`});
+buildReel([
+ {dur:3.3,cls:'hook',html:`<div class="A big" data-in="left">$40<br>CLEANER</div><div class="A vs" data-in="pop">VS</div>
+   <div class="A big y" data-in="right">$120<br>CLEANER</div><div class="line" data-in data-at="1.1">Same skills. Same city.<br>Totally different system.</div>`},
+ pair('Waits for DMs','Booking link in bio'),
+ pair('Replies the next day','Texts back in minutes'),
+ pair('No deposit','Deposit at booking'),
+ pair('Chases payment after','Paid before the work'),
+ {dur:4.4,cls:'fix',html:`<h2 data-in>YOU DON'T NEED NEW SKILLS.</h2><ul>
+   <li data-in="left" data-at="0.8"><b>1</b>Put a booking link in your bio</li>
+   <li data-in="left" data-at="1.4"><b>2</b>Text back missed calls fast</li>
+   <li data-in="left" data-at="2.0"><b>3</b>Take a deposit at booking</li></ul>`},
+ {dur:3.6,last:true,cls:'cta',html:`<div class="k" data-in>COMMENT</div><div class="box" data-in="pop" data-stamp="1.4">"SYSTEM"</div>
+   <div class="s" data-in>& I'll send you the<br>booking-link setup</div>
+   <div class="s y" data-in style="font-size:40px;margin-top:50px;letter-spacing:4px">@BOOKEDANDPAIDBLUEPRINT</div>`},
+]);
+</script></body></html>
