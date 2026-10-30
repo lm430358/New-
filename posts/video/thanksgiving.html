@@ -1,0 +1,186 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#2a160c;font-family:Outfit,sans-serif}
+#table{position:absolute;inset:0;background:
+ radial-gradient(ellipse at 50% 52%,rgba(255,170,90,.35),transparent 55%),
+ repeating-linear-gradient(92deg,#5a3019 0 46px,#4e2914 46px 50px,#633520 50px 120px,#55301a 120px 124px),
+ #4a2612}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(10,4,0,.75) 100%);pointer-events:none}
+.bokeh{position:absolute;border-radius:50%;background:radial-gradient(circle,#ffd18a,rgba(255,160,60,0) 70%);filter:blur(6px)}
+#food{position:absolute;inset:0;transform-origin:50% 52%}
+svg{position:absolute;overflow:visible}
+.steam path{fill:none;stroke:rgba(255,248,235,.55);stroke-width:16;stroke-linecap:round;filter:blur(7px)}
+.leaf{position:absolute;top:-120px;width:70px;height:70px}
+.cap{position:absolute;left:0;right:0;text-align:center;color:#fff3df;font-family:"Cormorant Garamond",serif;font-weight:700;font-size:84px;line-height:1.1;padding:0 90px;text-shadow:0 6px 30px rgba(0,0,0,.6);opacity:0}
+#env{position:absolute;left:140px;top:640px;width:800px;height:560px;opacity:0;perspective:1600px}
+.envb{position:absolute;inset:0;background:linear-gradient(160deg,#b33a24,#8e2716);border-radius:18px;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.envf{position:absolute;inset:0;border-radius:18px;background:
+ linear-gradient(32deg,#a5321e 50%,transparent 50.2%) left/50% 100% no-repeat,
+ linear-gradient(-32deg,#a5321e 50%,transparent 50.2%) right/50% 100% no-repeat,
+ linear-gradient(0deg,#9a2d1a 45%,transparent 45.2%);z-index:3}
+.flap{position:absolute;left:0;right:0;top:0;height:330px;transform-origin:top;z-index:4;
+ background:linear-gradient(180deg,#c4452c,#a73420);clip-path:polygon(0 0,100% 0,50% 100%);border-radius:18px 18px 0 0}
+.seal{position:absolute;left:340px;top:270px;width:120px;height:120px;border-radius:50%;z-index:5;
+ background:radial-gradient(circle at 35% 30%,#f2c96b,#c9922e 55%,#8a5e14);box-shadow:0 6px 14px rgba(0,0,0,.4);
+ display:grid;place-items:center;font-size:58px}
+#card{position:absolute;left:170px;top:700px;width:740px;height:1000px;z-index:2;border-radius:14px;opacity:0;
+ background:radial-gradient(circle at 30% 20%,#fffaf0,#f6ead2 70%,#efdfc0);
+ box-shadow:0 50px 100px rgba(0,0,0,.55);transform-origin:50% 50%}
+#card .in{position:absolute;inset:26px;border:4px solid #c9a24a;border-radius:8px;outline:2px solid #c9a24a;outline-offset:-16px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#5b2a12;padding:40px}
+.k{font-family:"Great Vibes",cursive;font-size:96px;color:#b5651d;line-height:1}
+.t{font-family:"Cormorant Garamond",serif;font-weight:700;font-size:118px;line-height:.95;color:#6b2c10;margin-top:10px}
+.div{width:360px;height:4px;margin:44px 0 36px;background:linear-gradient(90deg,transparent,#c9a24a,transparent)}
+.d{font-family:"Cormorant Garamond",serif;font-weight:700;font-size:58px;color:#6b2c10}
+.d2{font-family:Outfit;font-weight:500;font-size:36px;letter-spacing:3px;color:#9a6a3c;margin-top:16px}
+.note{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:600;font-size:46px;color:#8a4a1c;margin-top:40px}
+.rsvp{margin-top:46px;background:#b5651d;color:#fff8ec;font-weight:700;font-size:38px;letter-spacing:6px;padding:22px 64px;border-radius:999px;box-shadow:0 10px 24px rgba(181,101,29,.45)}
+.corner{position:absolute;font-size:64px}
+.spark{position:absolute;width:18px;height:18px;border-radius:50%;background:#ffe29a;box-shadow:0 0 18px #ffd36b}
+</style></head><body>
+<div id="table"></div>
+<div id="bokehs"></div>
+<div id="food">
+ <!-- turkey platter -->
+ <svg id="turkey" width="620" height="460" style="left:230px;top:760px" viewBox="0 0 620 460">
+  <defs>
+   <radialGradient id="tk" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#f6b25a"/><stop offset=".45" stop-color="#c96a22"/><stop offset="1" stop-color="#7a3510"/></radialGradient>
+   <radialGradient id="pl" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#fffdf8"/><stop offset=".8" stop-color="#eee3d0"/><stop offset="1" stop-color="#c9b89a"/></radialGradient>
+   <linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+   <clipPath id="tclip"><ellipse cx="310" cy="235" rx="200" ry="140"/></clipPath>
+  </defs>
+  <ellipse cx="310" cy="300" rx="300" ry="150" fill="rgba(0,0,0,.35)" filter="blur(10px)"/>
+  <ellipse cx="310" cy="280" rx="300" ry="160" fill="url(#pl)"/>
+  <ellipse cx="310" cy="280" rx="250" ry="125" fill="none" stroke="#d9c49c" stroke-width="5"/>
+  <g fill="#5d8a3a"><ellipse cx="120" cy="330" rx="40" ry="16" transform="rotate(-25 120 330)"/><ellipse cx="500" cy="330" rx="40" ry="16" transform="rotate(25 500 330)"/><ellipse cx="150" cy="210" rx="34" ry="13" transform="rotate(30 150 210)"/><ellipse cx="470" cy="210" rx="34" ry="13" transform="rotate(-30 470 210)"/></g>
+  <g fill="#c2182b"><circle cx="140" cy="345" r="13"/><circle cx="160" cy="352" r="11"/><circle cx="480" cy="345" r="13"/><circle cx="460" cy="353" r="11"/><circle cx="168" cy="200" r="10"/><circle cx="452" cy="200" r="10"/></g>
+  <g fill="#f2a34a"><circle cx="105" cy="290" r="16"/><circle cx="515" cy="290" r="16"/></g>
+  <!-- drumsticks -->
+  <g><ellipse cx="160" cy="300" rx="70" ry="48" fill="url(#tk)" transform="rotate(-20 160 300)"/><rect x="88" y="318" width="40" height="18" rx="6" fill="#fffaf0" transform="rotate(-20 108 327)"/>
+     <ellipse cx="460" cy="300" rx="70" ry="48" fill="url(#tk)" transform="rotate(20 460 300)"/><rect x="492" y="318" width="40" height="18" rx="6" fill="#fffaf0" transform="rotate(20 512 327)"/></g>
+  <ellipse cx="310" cy="235" rx="200" ry="140" fill="url(#tk)"/>
+  <path d="M170 220 Q310 120 450 220" stroke="#e89a45" stroke-width="10" fill="none" opacity=".7"/>
+  <g stroke="#8a3d12" stroke-width="5" fill="none" opacity=".45" stroke-linecap="round"><path d="M200 270 q40 20 80 5"/><path d="M330 290 q50 10 90 -15"/><path d="M230 210 q30 -18 60 -10"/><path d="M360 200 q30 -10 55 8"/><path d="M290 320 q20 8 45 0"/></g>
+  <g stroke="#3f6b25" stroke-width="5" stroke-linecap="round"><path d="M300 130 L340 104"/><path d="M308 125 l-6 -16 M318 119 l-4 -17 M328 112 l-2 -16 M312 127 l12 8 M322 120 l12 8 M332 113 l12 7"/></g>
+  <g fill="#fffaf0"><circle cx="80" cy="345" r="13"/><circle cx="92" cy="356" r="13"/><circle cx="540" cy="345" r="13"/><circle cx="528" cy="356" r="13"/></g>
+  <g clip-path="url(#tclip)"><rect id="sheen" x="-160" y="80" width="120" height="320" fill="url(#shine)" transform="skewX(-20)"/></g>
+  <ellipse cx="250" cy="170" rx="70" ry="26" fill="#fff" opacity=".28"/>
+  <g class="steam"><path d="M260 120 q-30 -60 0 -120 t0 -120"/><path d="M330 100 q30 -60 0 -120 t0 -120"/><path d="M390 130 q-30 -60 0 -120 t0 -120"/></g>
+ </svg>
+ <!-- mac & cheese -->
+ <svg id="mac" width="380" height="280" style="left:30px;top:1240px" viewBox="0 0 380 280">
+  <defs><radialGradient id="ch" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#ffd25a"/><stop offset=".6" stop-color="#f0a52a"/><stop offset="1" stop-color="#b8681a"/></radialGradient></defs>
+  <ellipse cx="190" cy="170" rx="180" ry="95" fill="rgba(0,0,0,.35)" filter="blur(8px)"/>
+  <ellipse cx="190" cy="150" rx="180" ry="95" fill="#f7f1e6"/><ellipse cx="190" cy="140" rx="150" ry="72" fill="url(#ch)"/>
+  <g fill="#c56f1c" opacity=".7"><circle cx="130" cy="130" r="9"/><circle cx="200" cy="115" r="7"/><circle cx="250" cy="150" r="10"/><circle cx="170" cy="165" r="8"/><circle cx="110" cy="160" r="6"/></g>
+  <g class="bub" fill="#ffe38a"><circle cx="150" cy="120" r="10"/><circle cx="230" cy="135" r="8"/><circle cx="190" cy="160" r="9"/></g>
+  <ellipse cx="150" cy="110" rx="50" ry="14" fill="#fff" opacity=".3"/>
+  <g class="steam"><path d="M150 80 q-25 -50 0 -100 t0 -100"/><path d="M230 90 q25 -50 0 -100 t0 -100"/></g>
+ </svg>
+ <!-- pumpkin pie -->
+ <svg id="pie" width="380" height="280" style="left:670px;top:1240px" viewBox="0 0 380 280">
+  <defs><radialGradient id="pf" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#e98a3a"/><stop offset="1" stop-color="#a94e15"/></radialGradient></defs>
+  <ellipse cx="190" cy="175" rx="180" ry="92" fill="rgba(0,0,0,.35)" filter="blur(8px)"/>
+  <ellipse cx="190" cy="150" rx="175" ry="92" fill="#d79a52"/>
+  <ellipse cx="190" cy="150" rx="175" ry="92" fill="none" stroke="#e8b46a" stroke-width="16" stroke-dasharray="22 10"/>
+  <ellipse cx="190" cy="145" rx="145" ry="70" fill="url(#pf)"/>
+  <ellipse cx="160" cy="120" rx="60" ry="14" fill="#fff" opacity=".22"/>
+  <g id="cream"><ellipse cx="190" cy="135" rx="46" ry="26" fill="#fffdf6"/><ellipse cx="190" cy="118" rx="30" ry="20" fill="#fffdf6"/><ellipse cx="190" cy="104" rx="14" ry="12" fill="#fffdf6"/><ellipse cx="180" cy="112" rx="10" ry="6" fill="#fff" /></g>
+ </svg>
+ <!-- rolls -->
+ <svg id="rolls" width="320" height="240" style="left:60px;top:560px" viewBox="0 0 320 240">
+  <defs><radialGradient id="rl" cx="40%" cy="30%" r="70%"><stop offset="0" stop-color="#f3c27a"/><stop offset=".6" stop-color="#c9822f"/><stop offset="1" stop-color="#8a4f16"/></radialGradient></defs>
+  <ellipse cx="160" cy="160" rx="150" ry="70" fill="rgba(0,0,0,.3)" filter="blur(8px)"/>
+  <ellipse cx="160" cy="140" rx="150" ry="70" fill="#8a5a2b"/><ellipse cx="160" cy="130" rx="135" ry="58" fill="#f3e3c4"/>
+  <g><ellipse cx="110" cy="120" rx="55" ry="40" fill="url(#rl)"/><ellipse cx="200" cy="110" rx="55" ry="40" fill="url(#rl)"/><ellipse cx="160" cy="140" rx="55" ry="40" fill="url(#rl)"/>
+  <g fill="#fff" opacity=".35"><ellipse cx="95" cy="105" rx="18" ry="7"/><ellipse cx="185" cy="95" rx="18" ry="7"/><ellipse cx="145" cy="125" rx="18" ry="7"/></g></g>
+  <g class="steam"><path d="M160 80 q-20 -40 0 -80 t0 -80"/></g>
+ </svg>
+ <!-- cranberry -->
+ <svg id="cran" width="300" height="240" style="left:720px;top:570px" viewBox="0 0 300 240">
+  <ellipse cx="150" cy="160" rx="135" ry="62" fill="rgba(0,0,0,.3)" filter="blur(8px)"/>
+  <ellipse cx="150" cy="140" rx="135" ry="62" fill="#f4efe6"/><ellipse cx="150" cy="132" rx="105" ry="44" fill="#9d0f22"/>
+  <g fill="#c8203a"><circle cx="110" cy="125" r="14"/><circle cx="150" cy="118" r="15"/><circle cx="190" cy="128" r="13"/><circle cx="130" cy="145" r="12"/><circle cx="175" cy="146" r="12"/></g>
+  <g fill="#fff" opacity=".55"><circle cx="106" cy="120" r="4"/><circle cx="146" cy="112" r="4"/><circle cx="186" cy="123" r="4"/></g>
+ </svg>
+</div>
+<div id="leaves"></div>
+<div class="cap" id="c1" style="top:230px">Something smells good…</div>
+<div class="cap" id="c2" style="top:230px">…and there's a seat<br>with your name on it 🍂</div>
+<div id="env"><div class="envb"></div><div id="card"><div class="in">
+  <div class="corner" style="top:20px;left:24px">🍂</div><div class="corner" style="top:20px;right:24px">🍁</div>
+  <div class="corner" style="bottom:20px;left:24px">🌾</div><div class="corner" style="bottom:20px;right:24px">🦃</div>
+  <div class="k" id="ck">You're invited to</div>
+  <div class="t" id="ct">my<br>Thanksgiving</div>
+  <div class="div" id="cdv"></div>
+  <div class="d" id="cd">Thursday, November 26</div>
+  <div class="d2" id="cd2">TIME · PLACE COMING SOON</div>
+  <div class="note" id="cn">Bring your appetite &amp; your people</div>
+  <div class="rsvp" id="cr">RSVP</div>
+ </div></div>
+ <div class="envf"></div><div class="flap" id="flap"></div><div class="seal" id="seal">🍂</div></div>
+<div id="sparks"></div>
+<div id="vig"></div>
+<script>
+const $=id=>document.getElementById(id);
+const A=(el,fr,start,dur,o={})=>el.animate(fr,Object.assign({delay:start*1000,duration:dur*1000,fill:'both',easing:'cubic-bezier(.2,.8,.2,1)'},o));
+const pop='cubic-bezier(.3,1.6,.5,1)';
+// candle bokeh
+const bk=$('bokehs');[[120,300,90],[900,260,120],[980,1600,100],[60,1700,80],[520,180,60],[300,1500,50],[760,420,70]].forEach(([x,y,s],i)=>{
+ const b=document.createElement('div');b.className='bokeh';Object.assign(b.style,{left:x+'px',top:y+'px',width:s+'px',height:s+'px'});bk.appendChild(b);
+ b.animate([{opacity:.5},{opacity:.95},{opacity:.6}],{duration:1400+i*230,iterations:Infinity,direction:'alternate'});});
+// table + food entrance
+A($('table'),[{opacity:0},{opacity:1}],0,.6);
+A($('turkey'),[{transform:'scale(.5) translateY(120px)',opacity:0},{transform:'none',opacity:1}],.1,.8,{easing:pop});
+[['rolls','translate(-200px,-60px)',.7],['cran','translate(200px,-60px)',.9],['mac','translate(-220px,120px)',1.1],['pie','translate(220px,120px)',1.3]].forEach(([id,f,t])=>
+ A($(id),[{transform:f+' scale(.7)',opacity:0},{transform:'none',opacity:1}],t,.7,{easing:pop}));
+// slow push-in so it feels close enough to touch, then blur behind invitation
+A($('food'),[{transform:'scale(1)'},{transform:'scale(1.18)'}],0,6.4,{easing:'ease-in-out'});
+A($('food'),[{filter:'blur(0) brightness(1)'},{filter:'blur(10px) brightness(.55)'}],6.2,.8,{composite:'add'});
+// glossy sheen sweeps across turkey (repeating)
+A($('sheen'),[{transform:'skewX(-20) translateX(0)'},{transform:'skewX(-20) translateX(700px)'}],.9,1.6,{iterations:Infinity,endDelay:0,easing:'ease-in-out'});
+// steam loops
+document.querySelectorAll('.steam path').forEach((p,i)=>p.animate(
+ [{transform:'translateY(40px)',opacity:0},{opacity:.9,offset:.3},{transform:'translateY(-160px)',opacity:0}],
+ {duration:2600+i*170,delay:-(i*700),iterations:Infinity}));
+// bubbling cheese
+document.querySelectorAll('.bub circle').forEach((c,i)=>{c.style.transformBox='fill-box';c.style.transformOrigin='center';
+ c.animate([{transform:'scale(0)',opacity:0},{transform:'scale(1)',opacity:1,offset:.6},{transform:'scale(1.3)',opacity:0}],{duration:1100,delay:-(i*380),iterations:Infinity});});
+// whipped cream drop on pie
+const cr=$('cream');cr.style.transformBox='fill-box';cr.style.transformOrigin='center bottom';
+A(cr,[{transform:'translateY(-220px) scale(.6)',opacity:0},{transform:'translateY(0) scale(1.15,.85)',opacity:1,offset:.75},{transform:'none',opacity:1}],2.0,.7);
+// falling leaves
+const lv=$('leaves');for(let i=0;i<12;i++){const l=document.createElement('div');l.className='leaf';l.textContent=['🍂','🍁','🍂'][i%3];
+ l.style.cssText+=`left:${(i*97)%1040}px;font-size:${50+(i%3)*14}px`;lv.appendChild(l);
+ const d=6500+(i*811)%3500,sx=(i%2?1:-1)*(120+i*12);
+ l.animate([{transform:'translate(0,0) rotate(0)'},{transform:`translate(${sx}px,2200px) rotate(${(i%2?1:-1)*540}deg)`}],{duration:d,delay:-(i*1300)%d,iterations:Infinity});}
+// captions
+A($('c1'),[{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}],.6,.6);A($('c1'),[{opacity:1},{opacity:0}],3.2,.4,{fill:'forwards'});
+A($('c2'),[{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}],3.6,.6);A($('c2'),[{opacity:1},{opacity:0}],6.0,.4,{fill:'forwards'});
+// envelope
+const env=$('env');
+A(env,[{transform:'translateY(-1300px) rotate(-8deg)',opacity:1},{transform:'translateY(0) rotate(0)',opacity:1}],6.2,.8,{easing:pop});
+const seal=$('seal');A(seal,[{transform:'scale(1)'},{transform:'scale(1.25)',offset:.4},{transform:'scale(0) rotate(90deg)',opacity:0}],7.2,.5);
+A($('flap'),[{transform:'rotateX(0)'},{transform:'rotateX(180deg)'}],7.55,.55,{easing:'ease-in-out'});
+A($('flap'),[{zIndex:4},{zIndex:1}],7.8,.01);
+// sparkle burst at seal
+const sp=$('sparks');for(let i=0;i<14;i++){const s=document.createElement('div');s.className='spark';s.style.left='530px';s.style.top='960px';sp.appendChild(s);
+ const a=i/14*Math.PI*2,r=180+(i%3)*60;A(s,[{transform:'translate(0,0) scale(1)',opacity:0},{opacity:1,offset:.1},{transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) scale(.2)`,opacity:0}],7.35,.8,{easing:'ease-out'});}
+// card rises out of envelope, envelope drops away, card centers full-size
+const card=$('card');card.style.left='30px';card.style.top='30px';card.style.width='740px';card.style.height='500px';
+A(card,[{opacity:0},{opacity:1}],7.75,.15);A(card,[{transform:'translateY(0)'},{transform:'translateY(-520px)'}],8.0,.7,{easing:'ease-in-out'});
+A($('env').querySelector('.envb'),[{opacity:1},{opacity:0,transform:'translateY(700px)'}],8.7,.6,{easing:'ease-in'});
+A(env.querySelector('.envf'),[{opacity:1},{opacity:0,transform:'translateY(700px)'}],8.7,.6,{easing:'ease-in'});
+A($('flap'),[{opacity:1},{opacity:0}],8.7,.3);
+A(card,[{height:'500px',transform:'translateY(-520px)'},{height:'1000px',transform:'translateY(-210px)'}],8.9,.6,{fill:'forwards',easing:'cubic-bezier(.2,.8,.2,1)'});
+// card content writes in
+const items=[['ck',9.5],['ct',9.9],['cdv',10.4],['cd',10.6],['cd2',10.9],['cn',11.3],['cr',11.8]];
+items.forEach(([id,t])=>A($(id),[{opacity:0,transform:'translateY(24px)'},{opacity:1,transform:'none'}],t,.55));
+document.querySelectorAll('.corner').forEach((c,i)=>A(c,[{opacity:0,transform:'scale(0)'},{opacity:1,transform:'none'}],9.6+i*.12,.4,{easing:pop}));
+$('cdv').animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{delay:10400,duration:500,fill:'both',composite:'add'});
+A($('cr'),[{transform:'scale(1)'},{transform:'scale(1.07)'},{transform:'scale(1)'}],12.6,1.2,{iterations:3,fill:'none',easing:'ease-in-out'});
+window.REEL_DURATION=16;
+window.seek=t=>document.getAnimations().forEach(a=>{a.pause();a.currentTime=t*1000;});
+</script></body></html>
