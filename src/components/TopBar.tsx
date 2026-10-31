@@ -26,6 +26,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/ideas": "Content Ideas",
   "/library": "Content Library",
   "/assistant": "Smart Assistant",
+  "/marcus": "Marcus · Marketing Agent",
 };
 
 export function TopBar() {

@@ -3,10 +3,14 @@ import { z } from "zod";
 import type Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { getActiveBusinessContext, getActiveBusinessProfile } from "@/lib/business";
-import { runAssistantTurn } from "@/lib/ai/assistant";
+import { runAssistantTurn, AGENT_IDS, type AgentId } from "@/lib/ai/assistant";
 
-export async function GET() {
+const agentSchema = z.enum(AGENT_IDS as [AgentId, ...AgentId[]]);
+
+export async function GET(request: Request) {
+  const agent = agentSchema.catch("assistant").parse(new URL(request.url).searchParams.get("agent") ?? "assistant");
   const conversations = await prisma.conversation.findMany({
+    where: { agent },
     orderBy: { updatedAt: "desc" },
     take: 20,
     select: { id: true, title: true, updatedAt: true },
@@ -17,24 +21,26 @@ export async function GET() {
 const bodySchema = z.object({
   conversationId: z.string().optional(),
   message: z.string().min(1),
+  agent: agentSchema.default("assistant"),
 });
 
 export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  const { conversationId, message } = parsed.data;
+  const { conversationId, message, agent } = parsed.data;
 
   const profile = await getActiveBusinessProfile();
   const ctx = await getActiveBusinessContext();
 
   let conversation = conversationId
-    ? await prisma.conversation.findUnique({ where: { id: conversationId }, include: { messages: { orderBy: { createdAt: "asc" } } } })
+    ? await prisma.conversation.findFirst({ where: { id: conversationId, agent }, include: { messages: { orderBy: { createdAt: "asc" } } } })
     : null;
 
   if (!conversation) {
     conversation = await prisma.conversation.create({
       data: {
         businessProfileId: profile?.id,
+        agent,
         title: message.slice(0, 60),
       },
       include: { messages: true },
@@ -47,7 +53,7 @@ export async function POST(request: Request) {
   }));
 
   try {
-    const { reply, toolOutputs } = await runAssistantTurn(ctx, history, message);
+    const { reply, toolOutputs } = await runAssistantTurn(ctx, history, message, agent);
 
     await prisma.message.createMany({
       data: [

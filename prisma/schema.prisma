@@ -107,6 +107,8 @@ model Conversation {
   businessProfileId String?
   businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: SetNull)
 
+  /// Which agent owns this thread: "assistant" (Smart Assistant) or "marcus" (marketing agent).
+  agent     String    @default("assistant")
   title     String    @default("New conversation")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

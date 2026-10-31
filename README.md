@@ -77,7 +77,7 @@ ContentItem       — the Content Library: type, platform, title, body (JSON), i
 ContentCalendar   — saved calendars (days, start date, JSON entries)
 Campaign          — saved campaigns (input brief + full generated strategy, JSON)
 LeadMagnet        — saved lead magnets (format, title, JSON content)
-Conversation       — Smart Assistant chat threads
+Conversation       — chat threads for the Smart Assistant and Marcus (tagged by `agent`)
 Message           — messages within a conversation (role + content)
 ```
 
@@ -128,6 +128,13 @@ beta Tool Runner, to keep the core app on stable/GA API surface). The assistant 
 "make a week of posts about our promotion" actually calls the generators instead of the model
 just describing what it would do. Conversations persist to the database; tool outputs render
 as the same rich result cards used throughout the app.
+
+**Marcus, the marketing agent.** `/marcus` runs the same tool-use loop with a different role:
+Marcus is a senior marketing strategist. He diagnoses the goal first (audience, offer,
+channels, how success is measured), then builds the work. He has every Smart Assistant tool
+plus `plan_marketing_campaign` (the full campaign generator; results are saved to Campaigns)
+and `generate_content_ideas`. Each conversation is tagged with its agent (`Conversation.agent`),
+so Marcus's threads and the assistant's threads stay separate.
 
 **Trend research.** The brief allows for verified trend research via web search, but only if
 the app is given a way to distinguish a verified trend from a model guess. This app does not

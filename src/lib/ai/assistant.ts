@@ -2,6 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { anthropic, MODEL } from "./client";
 import { buildSystemPrompt } from "./context";
 import type { BusinessContext } from "@/lib/types";
+import { prisma } from "@/lib/prisma";
+import { getActiveBusinessProfile } from "@/lib/business";
 import {
   generateSocialPost,
   generateVideoScript,
@@ -12,6 +14,8 @@ import {
 } from "./generators";
 import { generateRepurposeOutput } from "./generators/repurpose";
 import { generateCalendar } from "./generators/calendar";
+import { generateCampaign } from "./generators/campaign";
+import { generateContentIdeas } from "./generators/ideas";
 import {
   socialPostToText,
   videoScriptToText,
@@ -28,7 +32,11 @@ export interface AssistantToolOutput {
   text: string;
 }
 
-const tools: Anthropic.Tool[] = [
+export type AgentId = "assistant" | "marcus";
+
+export const AGENT_IDS: AgentId[] = ["assistant", "marcus"];
+
+const baseTools: Anthropic.Tool[] = [
   {
     name: "generate_social_post",
     description: "Write one social media post for a specific platform, adapted to that platform's style.",
@@ -120,6 +128,42 @@ const tools: Anthropic.Tool[] = [
   },
 ];
 
+// Extra tools only Marcus (the marketing agent) gets — strategy-level work.
+const marketingTools: Anthropic.Tool[] = [
+  {
+    name: "plan_marketing_campaign",
+    description:
+      "Build a full marketing campaign: strategy summary, key messages, headlines, CTAs, ad copy variants, plus social posts, a video script, and an email. Expensive — use when the user wants a campaign or launch plan for a specific offer.",
+    input_schema: {
+      type: "object",
+      properties: {
+        productOrService: { type: "string" },
+        targetCustomer: { type: "string" },
+        offer: { type: "string", description: "The specific offer or promotion being marketed" },
+        price: { type: "string" },
+        goal: { type: "string", description: "e.g. Leads, Sales, Awareness, Bookings" },
+        lengthDays: { type: "number", description: "Campaign length in days (1-90)" },
+      },
+      required: ["productOrService", "targetCustomer", "offer", "goal", "lengthDays"],
+    },
+  },
+  {
+    name: "generate_content_ideas",
+    description: "Generate 10+ concrete content ideas across categories, tied to the business's content pillars.",
+    input_schema: {
+      type: "object",
+      properties: {
+        recentTopics: { type: "array", items: { type: "string" }, description: "Topics already covered, to avoid repeating" },
+      },
+    },
+  },
+];
+
+const TOOLS_BY_AGENT: Record<AgentId, Anthropic.Tool[]> = {
+  assistant: baseTools,
+  marcus: [...baseTools, ...marketingTools],
+};
+
 async function executeTool(name: string, input: Record<string, unknown>, ctx: BusinessContext): Promise<{
   forModel: string;
   output?: AssistantToolOutput | AssistantToolOutput[];
@@ -188,6 +232,52 @@ async function executeTool(name: string, input: Record<string, unknown>, ctx: Bu
         output: { title: calendar.title, contentType: "calendar", content: calendar, text: summaryForModel },
       };
     }
+    case "plan_marketing_campaign": {
+      const brief = {
+        productOrService: String(input.productOrService),
+        targetCustomer: String(input.targetCustomer),
+        offer: String(input.offer),
+        price: input.price ? String(input.price) : undefined,
+        goal: String(input.goal),
+        lengthDays: Math.min(Math.max(Number(input.lengthDays) || 14, 1), 90),
+      };
+      const campaign = await generateCampaign(ctx, brief);
+      const profile = await getActiveBusinessProfile();
+      await prisma.campaign.create({
+        data: {
+          businessProfileId: profile?.id,
+          title: campaign.title,
+          input: JSON.stringify(brief),
+          strategy: JSON.stringify(campaign),
+        },
+      });
+      const text = [
+        campaign.title,
+        "",
+        campaign.strategySummary,
+        "",
+        "Key messages:",
+        ...campaign.keyMessages.map((m) => `- ${m}`),
+        "",
+        "Headlines:",
+        ...campaign.headlines.map((h) => `- ${h}`),
+        "",
+        "CTAs:",
+        ...campaign.ctas.map((c) => `- ${c}`),
+      ].join("\n");
+      return {
+        forModel: `${text}\n\n(Also generated ${campaign.socialPosts.length} social posts, a video script, an email, and ${campaign.adCopyVariants.length} ad variants. Saved to Campaigns.)`,
+        output: { title: campaign.title, contentType: "campaign_asset", content: campaign, text },
+      };
+    }
+    case "generate_content_ideas": {
+      const recentTopics = Array.isArray(input.recentTopics) ? input.recentTopics.map(String) : undefined;
+      const ideas = await generateContentIdeas(ctx, { recentTopics });
+      const text = ideas.ideas
+        .map((i, n) => `${n + 1}. [${i.category} · ${i.pillar}] ${i.idea}\n   Hook: ${i.hookAngle}`)
+        .join("\n");
+      return { forModel: text, output: { title: "Content ideas", contentType: "idea", content: ideas, text } };
+    }
     default:
       return { forModel: `Unknown tool: ${name}` };
   }
@@ -204,12 +294,31 @@ Rules:
 - If the user references "this" or "that", assume they mean the most recent content discussed in the conversation.
 `.trim();
 
+const MARCUS_ROLE = `
+You are Marcus, the business's dedicated marketing agent — a senior marketing strategist who has run growth for small and local businesses. You think in terms of offers, audiences, positioning, funnels, and measurable results, and then you get the work made.
+
+How you work:
+- Lead with strategy. When the user brings a goal ("more bookings", "launch our new package", "slow month"), briefly diagnose it: who the target customer is, what the offer should be, which channels fit, and what success looks like. Ask at most one or two clarifying questions, and only when the answer would change the plan.
+- Then execute with your tools. Use plan_marketing_campaign for launches, promotions, or anything that needs a coordinated multi-channel push. Use generate_content_ideas when the user needs direction on what to post. Use the content tools (social posts, video scripts, emails, blogs, hooks, calendars) for individual assets.
+- Don't write finished content directly in your reply. The tools produce structured, quality-checked content that the UI shows and saves.
+- After using tools, give a short, confident summary: what you made, why it fits the goal, and one or two concrete next steps (when to post, what to test, what to measure).
+- Be direct and specific to this business. No generic marketing filler. If an idea won't work for this business, say so and suggest something better.
+- Introduce yourself as Marcus only if asked or at the start of a conversation. Don't keep repeating it.
+`.trim();
+
+const ROLE_BY_AGENT: Record<AgentId, string> = {
+  assistant: ASSISTANT_ROLE,
+  marcus: MARCUS_ROLE,
+};
+
 export async function runAssistantTurn(
   ctx: BusinessContext,
   history: Anthropic.MessageParam[],
-  userMessage: string
+  userMessage: string,
+  agent: AgentId = "assistant"
 ): Promise<{ reply: string; toolOutputs: AssistantToolOutput[] }> {
-  const system = buildSystemPrompt(ctx, ASSISTANT_ROLE);
+  const system = buildSystemPrompt(ctx, ROLE_BY_AGENT[agent]);
+  const tools = TOOLS_BY_AGENT[agent];
   const messages: Anthropic.MessageParam[] = [...history, { role: "user", content: userMessage }];
   const toolOutputs: AssistantToolOutput[] = [];
 
