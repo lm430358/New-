@@ -45,7 +45,7 @@ def st_stack(im,t,a,lines,o):
         f=F("anton",70 if small else (220 if len(txt)<=8 else 160 if len(txt)<=12 else 120))
         w=tw(d,txt,f); x=70-int((1-p)*700)
         if p>0:
-            if k==len(lines)-1 and not small: d.rectangle([0,y+18,x+w+40,y+f.size+20],fill=acc)
+            if k==len(lines)-1 and not small: d.rectangle([0,y+18,max(0,x+w+40),y+f.size+20],fill=acc)
             d.text((x,y),txt,font=f,fill=WHITE)
         y+=int(f.size*1.12)
     return im
