@@ -18,6 +18,7 @@ import {
   Lightbulb,
   Library,
   MessageCircle,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +68,10 @@ const groups: NavGroup[] = [
       { href: "/library", label: "Content Library", icon: Library },
       { href: "/assistant", label: "Smart Assistant", icon: MessageCircle },
     ],
+  },
+  {
+    title: "Money",
+    items: [{ href: "/trading", label: "Trading Assistant", icon: TrendingUp }],
   },
 ];
 
